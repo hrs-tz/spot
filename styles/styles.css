@@ -1,0 +1,123 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    color: #65615D;
+}
+
+h1{
+    font-size: 34px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+
+p{
+    size: 20px;
+}
+
+.logo{
+    color: #65615D;
+    font-size: 30px;
+    text-decoration: none;
+    text-transform: lowercase;
+}
+
+.primary-button{
+    display: inline-block;
+    color: #FFFFFF;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    text-decoration: none;
+    text-transform: uppercase;
+    text-align: center;
+    border-radius: 10px;
+    background: #009CD4;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+    cursor:pointer;
+}
+
+.primary-button:hover, .primary-button:active { 
+    background-color: #7DE4FA;
+    transition: background-color 0.1s ease-in, color 0.1s ease-in;
+}
+
+.primary-button-disabled{
+    display: inline-block;
+    color: #65615d81;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    text-decoration: none;
+    text-transform: uppercase;
+    text-align: center;
+    border-radius: 10px;
+    background: #65615d2c;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+}
+
+.ghost-button{
+    display: inline-block; 
+    color: #65615D;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    text-decoration: none;
+    text-transform: uppercase;
+    text-align: center;
+    border-radius: 10px;
+    border: 2px solid #65615D;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+    cursor:pointer;
+}
+
+.ghost-button:hover, .ghost-button:active { 
+    color: #7DE4FA;
+    border-color: #7DE4FA;
+    transition: border-color 0.1s ease-in, color 0.1s ease-in;
+}
+
+.ghost-button-disabled{
+    display: inline-block; 
+    color: #65615d81;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    text-decoration: none;
+    text-transform: uppercase;
+    text-align: center;
+    border-radius: 10px;
+    border: 2px solid #65615d2c;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+}
+
+.borderless-button{
+    display: inline-block; 
+    color: #65615D;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    text-decoration: none;
+    text-transform: uppercase;
+    text-align: center;
+    border-radius: 10px;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+    cursor:pointer;
+}
+
+.accent-color{
+    color: #EA6060;
+}
