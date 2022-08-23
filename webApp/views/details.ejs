@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body>
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+    <div class="details content">
+        <h2><%= poi.name %> </h2>
+        <div class="content">
+            <p><%= poi.address %> </p>
+            <p><%= poi.rating %> </p>
+            <p><%= poi.time_spent %> </p>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+</html>

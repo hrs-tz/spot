@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body>
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+
+    <div id="map"></div>
+
+    <!-- leaflet js -->
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+    crossorigin=""></script>
+
+    <!-- leaflet-control-search -->
+    <script src="/leaflet-search/src/leaflet-search.js"></script>
+    
+    <!-- <script>
+    
+        // layer control
+        let markerLayerGroup = L.featureGroup().addTo(map);
+    
+        map.locate({setView: true, watch: true})
+            .on('locationfound', function(e){
+                const marker = L.marker([e.latitude, e.longitude]).bindPopup('You are here');
+                const circle = L.circle([e.latitude, e.longitude], e.accuracy/2, {
+                    weight: 1,
+                    color: 'blue',
+                    fillColor: '#cacaca',
+                    fillOpacity: 0.2
+                });
+                map.addLayer(marker);
+                map.addLayer(circle);
+            })
+           .on('locationerror', function(e){
+                console.log(e);
+                alert("Location access denied.");
+                const marker = L.marker([38.246639, 21.734573]).bindPopup('You are here');
+                map.addLayer(marker);
+                getPins();
+                map.addControl( new L.Control.Search({
+                    position: 'topright',
+                    layer: markerLayerGroup,
+                    initial: false,
+                    zoom: 13,
+                    marker: false}) );
+            });
+
+            async function getPins(e) {
+                //bounds = map.getBounds();
+                const url = '/all-pois';
+                const res = await fetch(url);
+                const data = await res.json();
+                pinMap(data.result);
+            }
+
+            function pinMap(data) {
+                map.removeLayer(markerLayerGroup);
+
+                let markerArray = new Array(data.length);
+
+                for (let i = 0; i < data.length; i++) {
+                    let poi = data[i];
+                    markerArray[i] = L.marker([poi.coordinates.lat, poi.coordinates.lng], {title: poi.name}).bindPopup(poi.name);
+                }
+                markerLayerGroup = L.layerGroup(markerArray).addTo(map);
+            }
+    
+            // map.on('dragend', getPins);
+            // map.on('zoomend', getPins);
+            // map.whenReady(getPins);
+            
+    </script> -->
+
+    <script>
+
+        function setMarkers(results) {
+            markersLayer.remove();
+            resultsLayer.clearLayers();
+            results.forEach((result) => {
+                data.forEach(poi => {
+                    if (poi.name === result.text) {
+                        const newMarker = L.marker(poi.loc);
+                        newMarker.bindPopup(`Name: ${poi.name} \n Type: ${poi.types}`);
+                        resultsLayer.addLayer(newMarker);
+                        match = true;
+                    }                  
+                })
+            });
+            //map.fitBounds(resultsLayer.getBounds());
+        }
+
+        async function getPins(e) {
+                //bounds = map.getBounds();
+                const url = '/all-pois';
+                const res = await fetch(url);
+                const data = await res.json();
+                pinMap(data.result);
+            }
+
+        function pinMap(data) {
+            data.forEach((item) => {
+                const marker = new L.Marker([item.coordinates.lat, item.coordinates.lng], { title: item.name, type: item.types }); //se property searched
+                marker.bindPopup("title: " + item.name);
+                markersLayer.addLayer(marker);
+            });
+        }
+
+        // map initialization
+        let map = L.map('map')
+        
+        let tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+
+        // osm layer
+        map.addLayer(tiles);
+
+        map.setView([38.2462420, 21.7350847], 13);
+
+        map.locate({setView: true, watch: true})
+            .on('locationfound', function(e){
+                const marker = L.marker([e.latitude, e.longitude]).bindPopup('You are here');
+                const circle = L.circle([e.latitude, e.longitude], e.accuracy/2, {
+                    weight: 1,
+                    color: 'blue',
+                    fillColor: '#cacaca',
+                    fillOpacity: 0.2
+                });
+                map.addLayer(marker);
+                map.addLayer(circle);
+            })
+            .on('locationerror', function(e){
+                console.log(e);
+                alert("Location access denied.");
+                const marker = L.marker([38.246639, 21.734573]).bindPopup('You are here');
+                map.addLayer(marker);
+            });
+
+        let data = [
+            {
+                loc: [38.2466877, 21.7352181],
+                name: "Zizu",
+                types: ["cafe", "bar"]
+            },
+            {
+                loc: [38.246187, 21.7352598],
+                name: "Butter Batlers",
+                types: ["cafe"]
+            },
+            {
+                loc: [38.35775, 21.74876],
+                name: "Butter Batler",
+                types: ["crepes"]
+            }
+        ];
+
+        // Create layer groups
+        var markersLayer = new L.LayerGroup(); //layer contain searched elements
+        var resultsLayer = L.featureGroup();
+
+        map.addLayer(markersLayer);
+        map.addLayer(resultsLayer);
+
+        // Create array to hold potential results
+        let results = [];
+
+        // Create search control
+        var controlSearch = new L.Control.Search({
+        position: "topright",
+        layer: markersLayer,
+        propertyName: 'name',
+        initial: false,
+        zoom: 12,
+        marker: false,
+        tipAutoSubmit: false,
+        // hijack buildtip function, push results to array
+        buildTip: (text, loc) => {
+            results.push({ loc, text });
+            const tip = L.DomUtil.create("div");
+            tip.innerHTML = text;
+            L.DomEvent.disableClickPropagation(tip)
+            .on(tip, "click", L.DomEvent.stop, controlSearch)
+            .on(
+                tip,
+                "click",
+                function (e) {
+                controlSearch._input.value = text;
+                controlSearch._handleAutoresize();
+                controlSearch._input.focus();
+                controlSearch._hideTooltip();
+                controlSearch._handleSubmit();
+                setMarkers(results);
+                results = [];
+                },
+                controlSearch
+            );
+            return tip;
+        },
+        moveToLocation: results.length
+            ? () => {}
+            : L.Control.Search._defaultMoveToLocation
+        });
+
+    map.addControl(controlSearch);
+    
+
+    data.forEach((item) => {
+    const marker = new L.Marker(new L.latLng(item.loc), { title: item.name, types: item.types }); //se property searched
+    marker.bindPopup("title: " + item.name);
+    markersLayer.addLayer(marker);
+    });
+
+    // Grab the input element and add an event listener to it
+    const inputEl = document.querySelector("input.search-input");
+
+    inputEl.addEventListener("keypress", function (e) {
+    if (e.key === "Enter" && results.length) {
+        
+        setMarkers(results);
+        results = [];
+    }
+    });
+    </script>
+
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.2/leaflet-search.src.js" integrity="sha512-V+GL/y/SDxveIQvxnw71JKEPqV2N+RYrUlf6os3Ru31Yhnv2giUsPadRuFtgmIipiXFBc+nCGMHPUJQc6uxxOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</html>
+
+
+
