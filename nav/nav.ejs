@@ -1,0 +1,39 @@
+%>
+<div class="site-title">
+        <a href="/home"><h1>spot</h1></a>
+    <p>Live.Safer.</p>
+</div>
+
+<% if (user) { %> 
+    <div class="topnav" id="myTopnav">
+        <a href="#"> Welcome, <%= user.username %> </a>
+        <a href="/home">Homepage</a>
+        <a href="/report">Report Positive Case</a>
+        <a href="/contact-tracing">Contact Tracing</a>
+        <a href="/profile">Profile</a>
+        <div class="topnav-right">
+        <a href="/logout">Log Out</a>
+        </div>
+        <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+            <i class="fa fa-bars"></i>
+    </a>
+  </div> 
+  <% } else { %> 
+    <div class="topnav topnav-right" id="myTopnav">
+            <a href="/signup">Sign Up</a>
+            <a href="/login">Login</a>
+        </div>
+        <% } %> 
+</br>
+  
+  
+  <script>
+  function myFunction() {
+    var x = document.getElementById("myTopnav");
+    if (x.className === "topnav") {
+      x.className += " responsive";
+    } else {
+      x.className = "topnav";
+    }
+  }
+  </script>
