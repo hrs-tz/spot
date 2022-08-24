@@ -20,10 +20,46 @@
   </div> 
   <% } else { %> 
     <div class="topnav-right">
-            <a href="/signup">Sign Up</a>
-            <a href="/login">Login</a>
+            <button onclick="document.getElementById('signup').style.display='block'" class="w3-button w3-hover-red w3-indigo">Get Started</button>
+            <button onclick="document.getElementById('login').style.display='block'" class="w3-button w3-hover-red w3-white">Login</button>
         </div>
         <% } %> 
+        <div id="signup" class="w3-modal">
+          <div class="w3-modal-content">
+            <div class="w3-container">
+              <span onclick="document.getElementById('signup').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+              <form>
+                  <label for="username">username:</label>
+                  <input type="text" id="username" name="username" required>
+                  <div class="username error"></div>
+                  <label for="password">password:</label>
+                  <input type="password" id="password" name="password" required>
+                  <div class="password error"></div>
+                  <label for="email">email:</label>
+                  <input type="email" id="email" name="email" required>
+                  <div class="email error"></div>
+                  <button>Sign Up</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div id="login" class="w3-modal">
+          <div class="w3-modal-content">
+            <div class="w3-container">
+              <span onclick="document.getElementById('login').style.display='none'" class="w3-button  w3-display-topright">&times;</span>
+              <form>
+                  <label for="email">email:</label>
+                  <input type="email" id="email" name="email" required>
+                  <div class="email error"></div>
+                  <label for="password">password:</label>
+                  <input type="password" id="password" name="password" required>
+                  <div class="password error"></div>
+                  <button>Login</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        
 </br>
   
   
@@ -37,3 +73,98 @@
     }
   }
   </script>
+    <script>
+      // Get the modal
+      var modal = document.getElementById('login');
+      
+      // When the user clicks anywhere outside of the modal, close it
+      window.onclick = function(event) {
+        if (event.target == modal) {
+          modal.style.display = "none";
+        }
+      }
+      </script>
+      <script>
+            // Get the modal
+            var modal = document.getElementById('signup');
+            
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function(event) {
+              if (event.target == modal) {
+                modal.style.display = "none";
+              }
+            }
+       </script>
+            <script>
+              const form = document.querySelector('form');
+              const emailError = document.querySelector('.email.error');
+              const passwordError = document.querySelector('.password.error');
+              form.addEventListener('submit', async (e) => {
+                  e.preventDefault();
+                  // reset errors
+                  emailError.textContent = '';
+                  passwordError.textContent = '';
+                  // get the values from the form
+                  const email = form.email.value;
+                  const password = form.password.value;
+                  try {
+                      const res = await fetch('/login', {
+                          method: 'POST',
+                          body: JSON.stringify({ email: email, password: password }),
+                          headers: {'Content-Type': 'application/json' }
+                      });
+                      const data = await res.json();
+                      if (data.errors) {
+                          emailError.textContent = data.errors.email;
+                          passwordError.textContent = data.errors.password;
+                      }
+                      if (data.user) {
+                          location.assign('/home');
+                      }
+                  }
+                  catch (err) {
+                      console.log(err);
+                  }
+              })
+          </script>
+          <script>
+            const formSignup = document.querySelector('form');
+            const usernameErrorSignup = document.querySelector('.username.error');
+            const passwordErrorSignup = document.querySelector('.password.error');
+            const emailErrorSignup = document.querySelector('.email.error');
+        
+            formSignup.addEventListener('submit', async (e) => {
+                e.preventDefault();
+        
+                // reset errors
+                usernameErrorSignup.textContent = '';
+                passwordErrorSignup.textContent = '';
+                emailErrorSignup.textContent = '';
+        
+                // get the values of the form
+                const username = formSignup.username.value;
+                const password = formSignup.password.value;
+                const email = formSignup.email.value;
+        
+                try {
+                    const res = await fetch('/signup', {
+                        method: 'POST',
+                        body: JSON.stringify({ username: username, password: password, email: email }),
+                        headers: {'Content-Type': 'application/json' }
+                    });
+                    const data = await res.json();
+                    console.log(data);
+                    if (data.errors) {
+                        usernameErrorSignup.textContent = data.errors.username;
+                        passwordErrorSignup.textContent = data.errors.password;
+                        emailErrorSignup.textContent = data.errors.email;
+                    }
+                    if (data.user) {
+                        location.assign('/home');
+                    }
+                }
+                catch (err) {
+                    console.log(err);
+                }
+            });
+        </script>
