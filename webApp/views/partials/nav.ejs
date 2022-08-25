@@ -1,24 +1,49 @@
-<nav>
-    <div class="site-title">
-        <% if (user) { %> 
-            <a href="/home"><h1>spot</h1></a>
-        <% } else { %> 
-            <a href="/"><h1>spot</h1></a>
-        <% } %> 
-        <p>Live.Safer.</p>
-    </div>
+%>
+<div class="site-title">
+        <a href="/home"><h1>spot</h1></a>
+    <p>Live.Safer.</p>
+</div>
 
-    <ul>
-        <% if (user) { %> 
-            <li>Welcome, <%= user.username %> </li>
-            <li><a href="/home">Homepage</a></li>
-            <li><a href="/report">Report Positive Case</a></li>
-            <li><a href="/contact-tracing">Contact Tracing</a></li>
-            <li><a href="/profile">Profile</a></li>
-            <li><a href="/logout">Log Out</a></li>
-        <% } else { %> 
-            <li><a href="/signup">Sign Up</a></li>
-            <li><a href="/login">Login</a></li>
+<% if (user) { %> 
+    <div class="topnav" id="myTopnav">
+        <a href="#"> Welcome, <%= user.username %> </a>
+        <a href="/home">Homepage</a>
+        <a href="/report">Report Positive Case</a>
+        <a href="/contact-tracing">Contact Tracing</a>
+        <a href="/profile">Profile</a>
+        <a href="/logout">Logout</a>
+        <a href="javascript:void(0);" class="icon " onclick="myFunction()">  <i class="fa fa-bars"></i>  </a>
+  </div> 
+  <% } else { %> 
+    <div class="topnav" id="myTopnav">
+    <div class="topnav-right">
+      <a href="/login">Login</a>
+      <a href="/signup">Get Started!</a>
+      <a href="javascript:void(0);" class="icon " onclick="myFunction()">  <i class="fa fa-bars"></i>  </a>
+    </div>
+  </div>
         <% } %> 
-    </ul>
-</nav>
+</br>
+  
+  
+  <script>
+  function myFunction() {
+    var x = document.getElementById("myTopnav");
+    if (x.className === "topnav") {
+      x.className += " responsive";
+    } else {
+      x.className = "topnav";
+    }
+  }
+  </script>
+    <script>
+  function myFunction() {
+    var x = document.getElementById("myTopnav");
+    if (x.className === "topnav") {
+      x.className += " responsive";
+    } else {
+      x.className = "topnav";
+    }
+  }
+  </script>
+   
