@@ -9,6 +9,7 @@
 
     <!-- content -->
     <div class="report content">
+        <br> <br>
         <div id="col1">
             <form>
                 <label for="date">Date of positive test:</label>
@@ -19,21 +20,22 @@
                 
                 <p>Type of test:</p>
                 <div class="type error"></div>
-                <div class="custom-select" style="width:200px;">
-                    <select>
-                      <option value="0">Select test type:</option>
+
+                <div class="custom-select" style="width:200px;" name="custom">
+                    <select name="select" id="name">
                       <option name="testType" id="pcr" value="PCR">PCR Test</option>
                       <option name="testType" id="rapid" value="RAPID">Rapid Test</option>
                     </select>
                   </div>
-                <button>Submit</button>
+                  <br>
+                <button class="primary-button">Submit</button>
                 <div class="user error"></div>
               </form>
       </div>
     </div>
 
       <div id="col2">
-            <img src="https://raw.githubusercontent.com/hrs-tz/spot/7dbe50b8143660bf53b74ae77ed36a1fb992657b/styles/img/report.svg"></img>
+            <img src="/public/img/report.svg" style="width: 90%;"></img>
       </div>
     </br>
 </body>
@@ -46,6 +48,7 @@
 
 <script>
   const form = document.querySelector('form');
+  console.log(form.custom);
   const userError = document.querySelector('.user.error');
   const dateError = document.querySelector('.date.error');
   const typeError = document.querySelector('.type.error');
@@ -60,8 +63,7 @@
 
       // get the values of the form
       const date = form.date.value;
-      const testType = form.testType.value;
-
+      const testType = form.select.value;
       try {
           const res = await fetch('/report', {
               method: 'POST',
