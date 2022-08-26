@@ -1,6 +1,10 @@
         .site-title h1{
             font-family: 'Urbanist', sans-serif;
-            color: #6F9931;
+            display: inline-block;
+            color: #65615D;
+            font-size: 30px;
+            text-decoration: none;
+            text-transform: lowercase;
         }
         body{
         max-width: 1200px;
@@ -22,31 +26,7 @@
                 height: 60vh;
             }
 
-        /* nav & footer styles */
-        nav{
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 60px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #ddd;
-        text-transform: uppercase;
-        }
-        nav ul{
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        }
-        nav li{
-        list-style-type: none;
-        margin-left: 20px;
-        }
-        nav h1{
-        font-size: 3em;
-        }
-        nav p, nav a{
-        color: #E64132;
-        font-weight: 300;
-        }
+        
         footer{
         color: #1A6D99;
         text-align: center;
@@ -86,22 +66,14 @@
         textarea{
         height: 120px;
         }
-        .report button{
-        margin-top: 20px;
-        background: #E64132;
-        color: white;
-        padding: 6px;
-        border: 0;
-        font-size: 1.2em;
-        cursor: pointer;
-        }
+        
 
 .topnav {
-  overflow: hidden;
+  overflow: visible;
   background-color: rgb(255, 255, 255);
   position: relative;
   float:center;
-  margin-left:20%;
+  margin-left:15%;
 }
 
 .topnav a {
@@ -110,12 +82,13 @@
   text-align: center;
   padding: 14px 16px;
   text-decoration: none;
+  text-transform: uppercase;
   font-size: 17px;
 }
 
 .topnav a:hover {
-  background-color: #ddd;
-  color: black;
+  background-color: #fff;
+  color: #7DE4FA;
 }
 
 .topnav a.active {
@@ -211,6 +184,7 @@ p{
     text-decoration: none;
     text-transform: uppercase;
     text-align: center;
+    border:none;
     border-radius: 10px;
     background: #009CD4;
     padding-left: 25px;
@@ -305,7 +279,7 @@ p{
 }
 #col1{ width:48%; float:left;}
 #col2 { width:48%; height:auto; float: right;}
-   @media only screen and (max-width: 768px) {
+   @media only screen and (max-width: 900px) {
        #col1{ width:100%; float:left;}
         #col2 { width:100%; }
    }
