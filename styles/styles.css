@@ -26,12 +26,6 @@
                 height: 60vh;
             }
 
-        
-        footer{
-        color: #1A6D99;
-        text-align: center;
-        margin: 80px auto 20px;
-        }
         h2{
         margin-bottom: 40px;
         }
@@ -72,8 +66,9 @@
   overflow: visible;
   background-color: rgb(255, 255, 255);
   position: relative;
-  float:center;
+
   margin-left:15%;
+  display: inline-block;
 }
 
 .topnav a {
@@ -110,6 +105,9 @@
   .topnav a {display: none;}
   .topnav a.icon {
     float: right;
+    display: block;
+  }
+  .topnav{
     display: block;
   }
 }
@@ -281,7 +279,7 @@ p{
 #col2 { width:48%; height:auto; float: right;}
    @media only screen and (max-width: 900px) {
        #col1{ width:100%; float:left;}
-        #col2 { width:100%; }
+        #col2 { width:50%; }
    }
   
    footer {
@@ -290,6 +288,8 @@ p{
     top: 90%;
     left: 50%;
     transform: translate(-50%, -50%);
+    color: #1A6D99;
+    text-align: center;
   }
 /*report css 
 /*the container must be positioned relative:*/
