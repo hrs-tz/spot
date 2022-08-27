@@ -9,7 +9,7 @@
     <br>
     <!-- content -->
     <div class="tab" style="width:100%">
-        <button class="tablinks" onclick="openmodal(event, 'Positive Tests')">Positive Tests</button>
+        <button class="tablinks" onclick="openmodal(event, 'Positive Tests')"id="defaultOpen">Positive Tests</button>
         <button class="tablinks" onclick="openmodal(event, 'List of Visits')">List of Visits</button>
         <button class="tablinks" onclick="openmodal(event, 'Profile Settings')">Profile Settings</button>
       </div>
@@ -71,10 +71,11 @@
             </form>
         </div>
       </div>
-    <!-- footer -->
-    <%- include('./partials/footer.ejs') %>
+   
 
 </body>
+ <!-- footer -->
+ <%- include('./partials/footer.ejs') %>
 </html>
 
 <script>
@@ -132,5 +133,6 @@
       document.getElementById(modalName).style.display = "block";
       evt.currentTarget.className += " active";
     }
+    document.getElementById("defaultOpen").click();
     </script>
        
