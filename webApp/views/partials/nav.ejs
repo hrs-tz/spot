@@ -1,29 +1,17 @@
 %>
-<div class="site-title">
-        <a href="/home"><h1>spot</h1></a>
-    <p>Live.Safer.</p>
-</div>
 
 <% if (user) { %> 
-    <div class="topnav" id="myTopnav">
-        <a href="#"> Welcome, <%= user.username %> </a>
+  <a href="/home" class="site-title"><h1>spot.</h1></a>
+    <div class="topnav"  id="myTopnav">
         <a href="/home">Homepage</a>
-        <a href="/report">Report Positive Case</a>
-        <a href="/contact-tracing">Contact Tracing</a>
-        <a href="/profile">Profile</a>
-        <a href="/logout">Logout</a>
+        <a href="/report">Report</a>
+        <a href="/contact-tracing">Tracing</a>
+        <a href="/profile" >Profile</a>
+        <a href="/logout" >Logout</a>
         <a href="javascript:void(0);" class="icon " onclick="myFunction()">  <i class="fa fa-bars"></i>  </a>
   </div> 
-  <% } else { %> 
-    <div class="topnav" id="myTopnav">
-    <div class="topnav-right">
-      <a href="/login">Login</a>
-      <a href="/signup">Get Started!</a>
-      <a href="javascript:void(0);" class="icon " onclick="myFunction()">  <i class="fa fa-bars"></i>  </a>
-    </div>
-  </div>
-        <% } %> 
-</br>
+  <% } %> 
+<br>
   
   
   <script>
@@ -36,14 +24,5 @@
     }
   }
   </script>
-    <script>
-  function myFunction() {
-    var x = document.getElementById("myTopnav");
-    if (x.className === "topnav") {
-      x.className += " responsive";
-    } else {
-      x.className = "topnav";
-    }
-  }
-  </script>
+
    
