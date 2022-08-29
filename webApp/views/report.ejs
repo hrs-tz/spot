@@ -38,11 +38,11 @@
             <img src="/public/img/report.svg" style="width: 90%;"></img>
       </div>
     </br>
-</body>
-</br>
-    <!-- footer -->
-    <%- include('./partials/footer.ejs') %>
-
+    
+    <footer class="footer" style="position:absolute">
+      Copyright © spot 2022
+      </footer>
+    
 </body>
 </html>
 
@@ -52,15 +52,12 @@
   const userError = document.querySelector('.user.error');
   const dateError = document.querySelector('.date.error');
   const typeError = document.querySelector('.type.error');
-
   form.addEventListener('submit', async (e) => {
       e.preventDefault();
-
       // reset errors
       userError.textContent = '';
       dateError.textContent = '';
       typeError.textContent = '';
-
       // get the values of the form
       const date = form.date.value;
       const testType = form.select.value;
