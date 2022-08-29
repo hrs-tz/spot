@@ -2,15 +2,21 @@
 <html lang="en">
 <!-- head -->
 <%- include('./partials/head.ejs') %>
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <body>
 
     <!-- navigation -->
-    <%- include('./partials/nav.ejs') %> 
+    <% if (user) { %> 
+      <%- include('./partials/nav.ejs') %> 
+    <% } else { %> 
+      <div class="topnav-right">
+        <a href="/login">Login</a>
+        <a href="/signup">Get Started!</a>
+      </div>
+          <% } %> 
 
     <!-- content -->
  <div>
-    <img src="https://raw.githubusercontent.com/hrs-tz/spot/7dbe50b8143660bf53b74ae77ed36a1fb992657b/styles/img/work-illustration.svg" >
+    <img src="https://raw.githubusercontent.com/hrs-tz/spot/7dbe50b8143660bf53b74ae77ed36a1fb992657b/styles/img/work-illustration.svg" class="center" >
  </div>
 
     <!-- footer -->
