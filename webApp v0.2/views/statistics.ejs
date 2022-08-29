@@ -27,13 +27,16 @@
         </div>
         <p class="tag">Daily report:</p>
         <!-- diagram: line chart 1 -->
-        <input type="date" id="month-selection">
+        <label for="date-selection-start">From:</label>
+        <input type="date" id="date-selection-start" onchange="postStartDate(event);" value= "<%= startDate %>" max="<%= currentDate %>">
+        <label for="date-selection-end">To:</label>
+        <input type="date" id="date-selection-end" onchange="postEndDate(event);" value= "<%= currentDate %>">
         <div>
             <canvas id="lineChart1"></canvas>
         </div>
         <p class="tag">Hourly report:</p>
         <!-- diagram: line chart 2 -->
-        <input type="date" id="date-selection">
+        <input type="date" id="date-selection" onchange="postDate(event);" value= "<%= currentDate %>">
         <div>
             <canvas id="lineChart2"></canvas>
         </div>
@@ -48,13 +51,75 @@
 </html>
 
 <script>
+    // change post to populate-statistics => διαχωρισμός των στατιστικών που επιστρέφονται ανα είδος!!
+    async function postDate(event) {
+        dateSelection.value = event.target.value;
+
+        // request statistics data
+        const res = await fetch('/populate-statistics', {
+            method: 'POST',
+            body: JSON.stringify({ from: startDate, to: endDate, selectedDate: dateSelection.value }),
+            headers: {'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+
+        lineChart2Data.visits = fillZeroHours(data.results.visitsPerHour);
+        lineChart2Data.dangerousVisits = fillZeroHours(data.results.dangerousVisitsPerHour);
+
+        lineChart2.data.datasets[0].data = lineChart2Data.visits;
+        lineChart2.data.datasets[1].data = lineChart2Data.dangerousVisits;
+        lineChart2.update();
+    }
+
+    async function postStartDate(event) {
+        startDateSelection.value = event.target.value;
+        startDate = startDateSelection.value;
+
+        // request statistics data
+        const res = await fetch('/populate-statistics', {
+            method: 'POST',
+            body: JSON.stringify({ from: startDate, to: endDate, selectedDate: dateSelection.value }),
+            headers: {'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+
+        // fill zero visits
+        lineChart1Data.visits = fillZeroDates(startDate, endDate, data.results.visitsPerDay);
+        lineChart1Data.dangerousVisits = fillZeroDates(startDate, endDate, data.results.dangerousVisitsPerDay);
+
+        lineChart1.data.datasets[0].data = lineChart1Data.visits;
+        lineChart1.data.datasets[1].data = lineChart1Data.dangerousVisits;
+        lineChart1.update();
+    }
+
+    async function postEndDate(event) {
+        endDateSelection.value = event.target.value;
+        endDate = endDateSelection.value;
+
+        // request statistics data
+        const res = await fetch('/populate-statistics', {
+            method: 'POST',
+            body: JSON.stringify({ from: startDate, to: endDate, selectedDate: dateSelection.value }),
+            headers: {'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+
+        // fill zero visits
+        lineChart1Data.visits = fillZeroDates(startDate, endDate, data.results.visitsPerDay);
+        lineChart1Data.dangerousVisits = fillZeroDates(startDate, endDate, data.results.dangerousVisitsPerDay);
+
+        lineChart1.data.datasets[0].data = lineChart1Data.visits;
+        lineChart1.data.datasets[1].data = lineChart1Data.dangerousVisits;
+        lineChart1.update();
+    }
 
     function fillZeroDates(startDate, endDate, data) {
         let index=0;
-            let tempDate = new Date(startDate);
+            let tempDate = new Date(startDate + 'T00:00:00.777+00:00');
+            let endDateDateFormat = new Date(endDate + 'T00:00:00.777+00:00');
             let filledData = [];
 
-            while (tempDate <= endDate) {
+            while (tempDate <= endDateDateFormat) {
                 let item = { totalVisits: 0, date: '' };
                 if (index < data.length) {
                     if(data[index].date === tempDate.toISOString().split('T')[0]) { 
@@ -117,32 +182,40 @@
     const totalNumberOfCases = document.querySelector('.total-cases');
     const totalNumberOfVisitsOfPositives = document.querySelector('.visits-of-positives');
     const dateSelection = document.getElementById('date-selection');
-    const monthSelection = document.getElementById('month-selection');
-    console.log(dateSelection.value);
+    const startDateSelection = document.getElementById('date-selection-start');
+    const endDateSelection = document.getElementById('date-selection-end');
+
+    // chart data initializations
     let columnChart1Data = [];
     let columnChart2Data = [];
-    //let lineChart1Data1 = [];
-    //let lineChart1Data2 = [];
     let lineChart2Data1 = [];
     let lineChart2Data2 = [];
-
     let lineChart1Data = { visits: [], dangerousVisits: [] };
     let lineChart2Data = { visits: [], dangerousVisits: [] };
-    const startDate = new Date('2022-08-01T00:00:00.777+00:00');
-    const endDate = new Date('2022-08-31T00:00:00.777+00:00');
 
+    // get time frame from user's input
+    let startDate = startDateSelection.value;
+    let endDate = endDateSelection.value;
+
+    let lineChart1 = '';
+    let lineChart2 = '';
+
+    // function to populate charts with data from db
     async function populateStatistics() {
         try {
 
             // request statistics data
-            const url = '/populate-statistics';
-            const res = await fetch(url);
+            const res = await fetch('/populate-statistics', {
+              method: 'POST',
+              body: JSON.stringify({ from: startDate, to: endDate, selectedDate: dateSelection.value }),
+              headers: {'Content-Type': 'application/json' }
+            });
             const data = await res.json();
             
             // get data
-            totalNumberOfVisits.textContent = data.results.totalVisits;
-            totalNumberOfCases.textContent = data.results.totalCases;
-            totalNumberOfVisitsOfPositives.textContent = data.results.visitsOfPositives;
+            totalNumberOfVisits.textContent = data.results.totalVisits; // total visits
+            totalNumberOfCases.textContent = data.results.totalCases; // total positive cases
+            totalNumberOfVisitsOfPositives.textContent = data.results.visitsOfPositives; // total visits by positive cases
             columnChart1Data = data.results.visitsPerType;
             columnChart2Data = data.results.dangerousVisitsPerType;
 
@@ -263,7 +336,7 @@
                 },
             };
 
-            const lineChart1 = new Chart(
+            lineChart1 = new Chart(
                 document.getElementById('lineChart1'),
                 configLineChart1
             );
@@ -307,7 +380,7 @@
                 },
             };
 
-            const lineChart2 = new Chart(
+            lineChart2 = new Chart(
                 document.getElementById('lineChart2'),
                 configLineChart2
             );

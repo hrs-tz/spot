@@ -170,7 +170,7 @@ app.delete('/delete-all-pois', requireAdminAuth, adminController.deleteAllPois_d
 
 app.get('/statistics', requireAdminAuth, adminController.statistics_get);
 
-app.get('/populate-statistics', requireAdminAuth, adminController.populateStatistics_get);
+app.post('/populate-statistics', requireAdminAuth, adminController.populateStatistics_post);
 
 // 404 page
 app.use((req, res) => {

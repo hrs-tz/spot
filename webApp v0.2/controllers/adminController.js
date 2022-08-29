@@ -112,10 +112,23 @@ module.exports.deleteAllPois_delete = async (req, res) => {
 };
 
 module.exports.statistics_get = (req, res) => {
-    res.render('statistics', { title: 'Statistics'});
+    // get current date
+    const today = new Date();
+    let startDate = new Date();
+    let currentDate = new Date();
+    if (today.getMonth()+1 < 10) {
+        currentDate = today.getFullYear()+'-'+'0'+(today.getMonth()+1)+'-'+today.getDate();
+        startDate = today.getFullYear()+'-'+'0'+(today.getMonth()+1)+'-'+(today.getDate()-7);
+    }
+    else {
+        currentDate = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+        startDate = today.getFullYear()+'-'+'0'+(today.getMonth())+'-'+(today.getDate()-7);
+    }
+
+    res.render('statistics', { title: 'Statistics', currentDate: currentDate, startDate: startDate });
 };
 
-module.exports.populateStatistics_get = async (req, res) => {
+module.exports.populateStatistics_post = async (req, res) => {
     let results = { totalVisits: 0, totalCases: 0, visitsOfPositives: 0, visitsPerType: [], dangerousVisitsPerType: [], visitsPerDay: [], dangerousVisitsPerDay: [], visitsPerHour: [], dangerousVisitsPerHour: [] };
 
     try {
@@ -305,9 +318,8 @@ module.exports.populateStatistics_get = async (req, res) => {
             }
         ]);
 
-        // time interval
-        const to = new Date('2022-08-31T00:00:00.777+00:00').toISOString().split('T')[0];
-        const from = new Date('2022-08-01T00:00:00.777+00:00').toISOString().split('T')[0];
+        // time interval and date selection
+        const { from, to, selectedDate } = req.body;
 
         // get visits per day
         results.visitsPerDay = await Visit.aggregate([
@@ -413,9 +425,6 @@ module.exports.populateStatistics_get = async (req, res) => {
                 }
             }
         ]);
-
-        // time selection
-        const selectedDate = new Date('2022-08-28T00:00:00.777+00:00').toISOString().split('T')[0];
 
         // get visits per hour
         results.visitsPerHour = await Visit.aggregate([
@@ -547,6 +556,11 @@ module.exports.populateStatistics_get = async (req, res) => {
         results.dangerousVisitsPerType.forEach(item => {
             item.poiInfo = item.poiInfo.replaceAll('_',' ');
         });
+
+        console.log(results.visitsPerDay);
+        console.log(results.dangerousVisitsPerDay);
+        console.log(results.visitsPerHour);
+        console.log(results.dangerousVisitsPerHour);
 
         res.status(200).json({ results });
     }
