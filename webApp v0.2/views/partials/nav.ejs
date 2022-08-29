@@ -1,0 +1,69 @@
+
+<% if (user) { %> 
+  <div class="topnav class="w3-row" id="myTopnav">
+      <a href="/home" class="site-title w3-s2 m2 l2 w3-left"><h1>spot.</h1></a>
+      <!-- <a href="#"> Welcome, <%= user.username %> </a> -->
+      <a href="/home">Homepage</a>
+      <a href="/report">Report</a>
+      <a href="/contact-tracing">Tracing</a>
+      <a href="/profile">Profile</a>
+      <a href="/logout">Logout</a>
+      <a href="javascript:void(0);" class="icon " onclick="myFunction()">  <i class="fa fa-bars"></i>  </a>
+</div> 
+<% } else { %> 
+  <div class="topnav" id="myTopnav">
+  <div class="topnav-right">
+    <a href="/login">Login</a>
+    <a href="/signup">Get Started!</a>
+    <a href="javascript:void(0);" class="icon " onclick="myFunction()">  <i class="fa fa-bars"></i>  </a>
+  </div>
+</div>
+      <% } %> 
+<br>
+
+<!-- <% if (user) { %> 
+    <div class="topnav" id="myTopnav">
+        <a href="#"> Welcome, <%= user.username %> </a>
+        <a href="/home" class="route">Homepage</a>
+        <a href="/report" class="route">Report Positive Case</a>
+        <a href="/contact-tracing" class="route">Contact Tracing</a>
+        <a href="/profile" class="route">Profile</a>
+        <div class="topnav-right">
+          <a href="/logout" class="ghost-button">Log Out</a>
+          <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+              <i class="fa fa-bars"></i>
+          </a>
+        </div>
+    </div> 
+<% } else if (admin) { %>
+    <div class="topnav" id="myTopnav">
+      <a href="#"> Welcome, <%= admin.username %> </a>
+      <a href="/dashboard" class="route">Dashboard</a>
+      <a href="/upload" class="route">Update pois</a>
+      <a href="/statistics" class="route">Statistics</a>
+      <div class="topnav-right">
+        <a href="/logout" class="ghost-button">Log Out</a>
+        <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+            <i class="fa fa-bars"></i>
+        </a>
+      </div>
+  </div> 
+<% } else { %>
+    <div class="topnav-right">
+      <a href="/signup">Sign Up</a>
+      <a href="/login">Login</a>
+    </div>
+<% } %>  -->
+</br>
+  
+  
+  <script>
+  function myFunction() {
+    var x = document.getElementById("myTopnav");
+    if (x.className === "topnav") {
+      x.className += " responsive";
+    } else {
+      x.className = "topnav";
+    }
+  }
+  </script>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body>
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+
+    <div id="map"></div>
+
+    <!-- leaflet js -->
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+    crossorigin=""></script>
+
+    <!-- leaflet-control-search -->
+    <script src="/leaflet-search/src/leaflet-search.js"></script>
+
+    <script>
+
+        // function to create markers for the search result
+        function setMarkers(results) {
+            const currentDate = new Date();
+            let hour = currentDate.getHours();
+            let day = currentDate.getDay();
+            if (day === 0) {
+                day = 6
+            }
+            else {
+                day-- ;
+            }
+            markersLayer.remove();
+            resultsLayer.clearLayers();
+            results.forEach((result) => {
+                data.forEach(poi => {
+                    if (poi.name === result.text) {
+
+                        // replace _ with space for readability
+                        let types = [];
+                        poi.types.forEach(type => {
+                            type = type.replaceAll('_', ' ');
+                            types.push(type);
+                        });
+
+                        // check if current popularity is available and form text popup
+                        let popup = '';
+                        if (poi.current_popularity) {
+                            popup = `<b>Name:</b> ${poi.name} <br>
+                            <b>Type:</b> ${types} <br>
+                            <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>
+                            <b>Current popularity:</b> ${poi.current_popularity}`;
+                        }
+                        else {
+                            popup = `<b>Name:</b> ${poi.name} <br>
+                            <b>Type:</b> ${types} <br>
+                            <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>`;
+                        }
+                        
+                        // create marker and add it to layer with search results
+                        const newMarker = L.marker([poi.coordinates.lat, poi.coordinates.lng]);
+                        newMarker.bindPopup(popup);
+                        resultsLayer.addLayer(newMarker);
+                    }                  
+                })
+            });
+            //map.fitBounds(resultsLayer.getBounds());
+        }
+
+        // functions to create markers for each poi from db
+        async function getPins() {
+            //bounds = map.getBounds();
+            const url = '/all-pois';
+            const res = await fetch(url);
+            const data = await res.json();
+            pinMap(data.result);
+            return data.result;
+        }
+
+        function pinMap(data) {
+            data.forEach((item) => {
+                const marker = new L.Marker([item.coordinates.lat, item.coordinates.lng], { name: item.name, type: item.types });
+                marker.bindPopup("name: " + item.name);
+                markersLayer.addLayer(marker);
+            });
+        }
+
+        // create layer groups
+        var markersLayer = new L.LayerGroup(); // layer with all pois from db (available within user's view)
+        var resultsLayer = L.featureGroup(); // layer for searched elements
+
+        // get pois from db and create markers
+        let promise = getPins();
+        promise.then(res => {
+            data = res;
+
+            // map initialization
+            let map = L.map('map');
+            
+            let tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            });
+
+            // osm layer
+            map.addLayer(tiles);
+
+            map.setView([38.2462420, 21.7350847], 12);
+
+            map.locate({setView: true, watch: true})
+                .on('locationfound', function(e){
+                    const marker = L.marker([e.latitude, e.longitude]).bindPopup('You are here');
+                    const circle = L.circle([e.latitude, e.longitude], e.accuracy/2, {
+                        weight: 1,
+                        color: 'blue',
+                        fillColor: '#cacaca',
+                        fillOpacity: 0.2
+                    });
+                    map.addLayer(marker);
+                    map.addLayer(circle);
+                })
+                .on('locationerror', function(e){
+                    console.log(e);
+                    alert("Location access denied.");
+                    const marker = L.marker([38.246639, 21.734573]).bindPopup('You are here');
+                    map.addLayer(marker);
+                });
+
+            map.addLayer(markersLayer);
+            map.addLayer(resultsLayer);
+
+            // create array to hold potential results
+            let results = [];
+
+            // create search control
+            var controlSearch = new L.Control.Search({
+            position: "topright",
+            layer: markersLayer,
+            propertyName: 'name',
+            initial: false,
+            zoom: 12,
+            marker: false,
+            tipAutoSubmit: false,
+            // hijack buildtip function, push results to array
+            buildTip: (text, loc) => {
+                results = [];
+                results.push({ loc, text });
+                const tip = L.DomUtil.create("div");
+                tip.innerHTML = text;
+                L.DomEvent.disableClickPropagation(tip)
+                .on(tip, "click", L.DomEvent.stop, controlSearch)
+                .on(
+                    tip,
+                    "click",
+                    function (e) {
+                    controlSearch._input.value = text;
+                    controlSearch._handleAutoresize();
+                    controlSearch._input.focus();
+                    controlSearch._hideTooltip();
+                    controlSearch._handleSubmit();
+                    setMarkers(results);
+                    results = [];
+                    },
+                    controlSearch
+                );
+                return tip;
+            },
+            moveToLocation: results.length
+                ? () => {}
+                : L.Control.Search._defaultMoveToLocation
+            });
+
+            map.addControl(controlSearch);
+            // remove markers with all pois
+            markersLayer.remove();
+
+            // grab the input element and add an event listener to it
+            const inputEl = document.querySelector("input.search-input");
+
+            inputEl.addEventListener("keypress", function (e) {
+            if (e.key === "Enter" && results.length) {
+                
+                setMarkers(results);
+                results = [];
+            }
+            });
+        });
+
+    </script>
+
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.2/leaflet-search.src.js" integrity="sha512-V+GL/y/SDxveIQvxnw71JKEPqV2N+RYrUlf6os3Ru31Yhnv2giUsPadRuFtgmIipiXFBc+nCGMHPUJQc6uxxOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</html>
+
+
+

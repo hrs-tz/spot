@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body>
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+    <div class="report content">
+        <form>
+          <label for="date">Date of positive test:</label>
+          <input type="date" id="date" name="date" value= "<%= currentDate %>" max="<%= currentDate %>" required>
+          <div class="date error"></div>
+
+          <br><br>
+          
+          <p>Type of test:</p>
+          <div class="type error"></div>
+          <div>
+            <select name="select" id="select">
+                <option value="PCR" name="testType" id="testType">PCR Test</option>
+                <option value="RAPID" name="testType" id="testType">RAPID TEST</option>
+            </select>
+          </div>
+          
+          <!-- <input type="radio" id="radid" name="testType" value="RAPID">
+            <label for="rapid">RAPID</label>
+            <input type="radio" id="pcr" name="testType" value="PCR">
+            <label for="pcr">PCR</label> -->
+          <button class="primary-button">Submit</button>
+          <div class="user error"></div>
+        </form>
+      </div>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+</html>
+
+<script>
+  const form = document.querySelector('form');
+  const userError = document.querySelector('.user.error');
+  const dateError = document.querySelector('.date.error');
+  const typeError = document.querySelector('.type.error');
+
+  form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // reset errors
+      userError.textContent = '';
+      dateError.textContent = '';
+      typeError.textContent = '';
+
+      // get the values of the form
+      const date = form.date.value;
+      const testType = form.select.value;
+
+      try {
+          const res = await fetch('/report', {
+              method: 'POST',
+              body: JSON.stringify({ date: date, testType: testType }),
+              headers: {'Content-Type': 'application/json' }
+          });
+          const data = await res.json();
+          //console.log(data);
+          if (data.errors) {
+              userError.textContent = data.errors.user;
+              dateError.textContent = data.errors.date;
+              typeError.textContent = data.errors.testType;
+          }
+          if (data.result) {
+              location.assign('/home');
+          }
+      }
+      catch (err) {
+          console.log(err);
+      }
+  });
+</script>

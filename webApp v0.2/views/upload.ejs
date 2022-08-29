@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+
+<body>
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+    <div class="upload content">
+        <form>
+            <label for="file">File:</label>
+            <input type="file" id="file" name="file" required>
+            <div class="upload error"></div>
+            <button>Upload</button>
+        </form>
+    </div>
+
+    <div>
+        <button type="button" class="primary-button" id="delete-button">Delete all pois</button>
+        <div class="delete error"></div>
+    </div>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+</html>
+
+<script>
+    const form = document.querySelector('form');
+    const uploadError = document.querySelector('.upload.error');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // reset errors
+        uploadError.textContent = '';
+
+        let formData = new FormData(); 
+        formData.append("file", file.files[0]);
+        const res = await fetch('/upload', {
+            method: "POST", 
+            body: formData
+        });
+
+        try {
+            const data = await res.json();
+
+            if (data.error) {
+                uploadError.textContent = data.error;
+            }
+            if (data.file) {
+                location.assign('/upload');
+            }
+        }
+        catch (err) {
+             console.log(err);
+        }
+    })
+</script>
+
+<script>
+    const button = document.querySelector('#delete-button');
+    const deleteError = document.querySelector('.delete.error');
+
+    button.onclick = async (e) => {
+        e.preventDefault();
+
+        console.log('clicked');
+        // reset error
+        deleteError.textContent = '';
+
+        try {
+            const res = await fetch('/delete-all-pois', {
+                method: "DELETE", 
+            });
+            const data = await res.json();
+            console.log(data);
+            if (data.error) {
+                deleteError.textContent = data.error;
+            }
+            if (data.deleted) {
+                location.assign('/upload');
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    };
+</script>

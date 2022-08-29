@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body>
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+    <div class="tracing content">
+        <h3>Contacts with positive cases:</h3>
+        <% if (dangerousPois.length > 0) { %>
+            <% dangerousPois.forEach(dangerousPoi => { %>
+                <label for="name">Name:</label>
+                <p class="name"><%= dangerousPoi.name %></p>
+                <label for="address">Address:</label>
+                <p class="address"><%= dangerousPoi.date %></p>
+                </a>
+            <% }) %>
+        <% } else { %>
+            <p>Empty List</p>
+        <% } %> 
+    </div>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+</html>

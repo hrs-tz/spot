@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body>
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+    <div>
+        <p class="tag">Total number of visits:</p>
+        <p class="info total-visits"></p>
+        <p class="tag">Total number of positive cases reported:</p>
+        <p class="info total-cases"></p>
+        <p class="tag">Total number of visits made by positive cases:</p>
+        <p class="info visits-of-positives"></p>
+        <p class="tag">Visits per POI:</p>
+        <!-- diagram: column chart 1 -->
+        <p class="tag">Top 10 most dangerous POIs:</p>
+        <!-- diagram: column chart 2 -->
+        <p class="tag">Daily report:</p>
+        <!-- diagram: line chart 1 -->
+        <p class="tag">Hourly report:</p>
+        <!-- diagram: line chart 2 -->
+    </div>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+</html>
+
+<script>
+
+    const totalNumberOfVisits = document.querySelector('.total-visits');
+    const totalNumberOfCases = document.querySelector('.total-cases');
+    const totalNumberOfVisitsOfPositives = document.querySelector('.visits-of-positives');
+    const columnChart1Data = [];
+
+    async function populateStatistics() {
+        try {
+            const url = '/populate-statistics';
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            totalNumberOfVisits.textContent = data.results.totalVisits;
+            totalNumberOfCases.textContent = data.results.totalCases;
+            totalNumberOfVisitsOfPositives.textContent = data.results.visitsOfPositives;
+            columnChart1Data = data.results.visitsPerPoi;
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    populateStatistics();
+
+</script>
