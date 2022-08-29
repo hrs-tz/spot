@@ -5,11 +5,13 @@ const Poi = require('./models/poi');
 const Visit = require('./models/visit');
 const authRoutes = require('./routes/authRoutes');
 const cookieParser = require('cookie-parser');
-const { requireAuth, checkUser } = require('./middleware/authMiddleware');
+const { requireAuth, requireAdminAuth, checkUser } = require('./middleware/authMiddleware');
 const homeController = require('./controllers/homeController')
 const profileController = require('./controllers/profileController');
 const reportController = require('./controllers/reportController');
 const tracingController = require('./controllers/tracingController');
+const adminController = require('./controllers/adminController');
+const Admin = require('./models/admin');
 
 // express app
 const app = express();
@@ -38,41 +40,36 @@ app.use(cookieParser());
 // test db save poi
 // app.get('/test-db', (req, res) => {
 //     const poi = new Poi({
-//         id: "ChIJ8yJ6relJXhMRo2XqEv0keZU",
-//         name: "SUPERMARKET \"3A ARAPIS\"",
-//         address: "Maizonos 22-24, Patra",
-//         types: ["supermarket", "grocery_or_supermarket", "food", "point_of_interest", "store", "establishment"],
-//         coordinates: {
-//             lat: 38.25060850000001,
-//             lng: 21.7398956
-//         },
-//         rating: 4.2,
-//         rating_n: 232,
-//         current_popularity: 29,
+//         id: "ChIJ4bvbRlU3XhMRizrDqc9I6fU",
+//         name: "Flocafe",
+//         address: "Akti Dimeon 17, Patra",
+//         types: ["cafe", "food", "point_of_interest", "establishment"],
+//         coordinates: {lat: 38.2376827, lng: 21.7259359},
+//         rating: 4.1,
+//         rating_n: 246,
 //         populartimes: [
 //             {name: "Monday",
-//             data: [0, 0, 0, 0, 0, 0, 0, 0, 19, 38, 60, 79, 89, 86, 70, 50, 33, 40, 71, 83, 49, 0, 0, 0]
+//             data: [0, 0, 0, 0, 0, 0, 0, 0, 19, 43, 56, 47, 31, 23, 21, 18, 16, 17, 24, 30, 31, 23, 13, 5]
 //             },
 //             {name: "Tuesday",
-//             data: [0, 0, 0, 0, 0, 0, 0, 0, 16, 32, 49, 65, 74, 73, 62, 46, 37, 53, 84, 88, 49, 0, 0, 0]
-//             }, 
+//             data: [0, 0, 0, 0, 0, 0, 0, 0, 19, 44, 59, 49, 25, 14, 19, 29, 28, 16, 13, 29, 44, 25, 5, 0]
+//             },
 //             {name: "Wednesday",
-//             data: [0, 0, 0, 0, 0, 0, 0, 0, 12, 35, 51, 58, 81, 100, 78, 52, 46, 46, 44, 40, 33, 0, 0, 0]
+//             data: [0, 0, 0, 0, 0, 0, 0, 0, 12, 21, 32, 36, 33, 24, 16, 12, 15, 22, 30, 33, 29, 20, 11, 5]
 //             },
 //             {name: "Thursday",
-//             data: [0, 0, 0, 0, 0, 0, 0, 0, 16, 30, 45, 59, 67, 66, 57, 46, 40, 46, 60, 64, 49, 0, 0, 0]
+//             data: [0, 0, 0, 0, 0, 0, 0, 0, 17, 31, 21, 27, 28, 24, 18, 16, 20, 30, 37, 39, 33, 21, 11, 4]
 //             },
 //             {name: "Friday",
-//             data: [0, 0, 0, 0, 0, 0, 0, 0, 12, 26, 44, 60, 69, 64, 51, 36, 32, 47, 67, 68, 42, 0, 0, 0]
+//             data: [0, 0, 0, 0, 0, 0, 0, 0, 16, 28, 39, 47, 46, 37, 25, 15, 7, 7, 16, 30, 41, 38, 23, 9]
 //             },
 //             {name: "Saturday",
-//             data: [0, 0, 0, 0, 0, 0, 0, 0, 5, 21, 44, 67, 80, 78, 64, 49, 38, 32, 25, 16, 0, 0, 0, 0]
+//             data: [0, 0, 0, 0, 0, 0, 0, 0, 7, 16, 22, 33, 66, 100, 90, 46, 14, 9, 29, 61, 70, 45, 16, 2]
 //             },
 //             {name: "Sunday",
-//             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+//             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 49, 56, 45, 27, 17, 25, 47, 67, 73, 59, 36, 0, 0]
 //             }
-//         ],
-//         time_spent: [15,15]
+//         ]
 //     });
 
 //     poi.save()
@@ -84,6 +81,21 @@ app.use(cookieParser());
 //         })
 // });
 
+app.get('/add-admin', (req, res) => {
+    const admin = new Admin({
+        username: 'admin',
+        password: 'admin'
+    });
+
+    admin.save()
+        .then((result) => {
+            res.send(result);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+})
+
 // test get all documents from db
 app.get('/all-pois', (req, res) => {
     Poi.find()
@@ -94,6 +106,17 @@ app.get('/all-pois', (req, res) => {
             console.log(err);
         });
 });
+
+// app.get('/available-pois', (req, res) => {
+//     const radians = 5/6371; // radians = distance / earth radius => km radians = distance in km / 6371
+//     Poi.find({ coordinates : { $near : [ -73.9667, 40.78 ], $maxDistance: radians } })
+//         .then((result) => {
+//             res.json({ result });
+//         })
+//         .catch((err) => {
+//             console.log(err);
+//         });
+// });
 
 // routes
 
@@ -112,7 +135,7 @@ app.use(authRoutes);
 app.get('/add-visit', requireAuth, (req, res) => {
     const visit = new Visit({
         user: res.locals.user,
-        poi: "62ed58ff42ee406b9c451b6c",
+        poi: "6309ee6431c4798171bdaa3d",
         estimation: 2
     });
 
@@ -135,7 +158,19 @@ app.get('/contact-tracing', requireAuth, tracingController.tracing_get);
 
 app.get('/profile', requireAuth, profileController.profile_get);
 
-app.post('/profile', requireAuth, profileController.profile_post)
+app.post('/profile', requireAuth, profileController.profile_post);
+
+app.get('/dashboard', requireAdminAuth, adminController.dashboard_get);
+
+app.get('/upload', requireAdminAuth, adminController.upload_get);
+
+app.post('/upload', requireAdminAuth, adminController.upload_post);
+
+app.delete('/delete-all-pois', requireAdminAuth, adminController.deleteAllPois_delete);
+
+app.get('/statistics', requireAdminAuth, adminController.statistics_get);
+
+app.post('/populate-statistics', requireAdminAuth, adminController.populateStatistics_post);
 
 // 404 page
 app.use((req, res) => {
