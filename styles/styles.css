@@ -36,12 +36,6 @@
         .content{
         margin-left: 20px;
         }
-
-        /* index styles */
-
-        /* details styles */
-
-        /* create styles */
         .report form{
         max-width: 400px;
         margin: 0 auto;
@@ -66,7 +60,7 @@
   overflow: visible;
   background-color: rgb(255, 255, 255);
   position: relative;
-
+  padding-bottom: 25px;
   margin-left:15%;
   display: inline-block;
 }
@@ -277,21 +271,23 @@ p{
 .accent-color{
     color: #EA6060;
 }
-#col1{ width:48%; float:left;}
-#col2 { width:48%; height:auto; float: right;}
+#col1{ width:49%; float:left;}
+#col2 { width:49%; height:auto; float: right;}
    @media only screen and (max-width: 900px) {
        #col1{ width:100%; float:left;}
         #col2 { width:50%; }
    }
   
-   footer {
-    text-align: center;
-    position: absolute;
+   .footer {
+    position: relative;
     top: 90%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: #1A6D99;
-    text-align: center;
+    padding-top:32px!important;
+    text-align:center!important;
+    margin-top:16px!important;
+    font-family: 'Noto Serif HK', serif;
   }
 /*report css 
 /*the container must be positioned relative:*/
@@ -394,4 +390,10 @@ input[type=date]:focus {
   padding: 6px 12px;
   border: 1px solid #ccc;
   border-top: none;
+  animation: fadeEffect 1s; /* Fading effect takes 1 second */
+}
+/* Go from zero to full opacity */
+@keyframes fadeEffect {
+  from {opacity: 0;}
+  to {opacity: 1;}
 }
