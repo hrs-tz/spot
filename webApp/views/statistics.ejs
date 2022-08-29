@@ -5,46 +5,9 @@
 <body>
     
     <!-- navigation -->
-    <div class="topnav-right" style="margin-bottom: 16px;">
-        <a href="/logout" >Logout</a>
-    </div>
+    <%- include('./partials/nav.ejs') %> 
+
     <!-- content -->
-    <div class="tab" style="width:100%">
-        <button class="tablinks" onclick="openmodal(event, 'Visits per POI type')"id="defaultOpen">Visits per POI type</button>
-        <button class="tablinks" onclick="openmodal(event, 'Dangerous visits per POI type')">Dangerous visits per POI type</button>
-        <button class="tablinks" onclick="openmodal(event, 'Daily report')">Daily report</button>
-        <button class="tablinks" onclick="openmodal(event, 'Hourly report')" style="width:100%">Hourly report</button>
-      </div>
-      <div id="Visits per POI type" class="tabcontent">
-        <p class="tag">Visits per POI type:</p>
-        <div>
-            <canvas id="columnChart1"></canvas>
-        </div>
-      </div>
-      <div id="Dangerous visits per POI type" class="tabcontent">
-        <p class="tag">Dangerous visits per POI type:</p>
-        
-        <div>
-            <canvas id="columnChart2"></canvas>
-        </div>
-      </div>
-      
-      <div id="Daily report" class="tabcontent">
-        <p class="tag">Daily report:</p>
-        <!-- diagram: line chart 1 -->
-        <input type="date" id="month-selection">
-        <div>
-            <canvas id="lineChart1"></canvas>
-        </div>
-      </div>
-      <div id="Hourly report" class="tabcontent">
-        <p class="tag">Hourly report:</p>
-        <!-- diagram: line chart 2 -->
-        <input type="date" id="date-selection">
-        <div>
-            <canvas id="lineChart2"></canvas>
-        </div>
-      </div>
     <div>
         <p class="tag">Total number of visits:</p>
         <p class="info total-visits"></p>
@@ -52,8 +15,30 @@
         <p class="info total-cases"></p>
         <p class="tag">Total number of visits made by positive cases:</p>
         <p class="info visits-of-positives"></p>
-        
-        
+        <p class="tag">Visits per POI type:</p>
+        <!-- diagram: column chart 1 -->
+        <div>
+            <canvas id="columnChart1"></canvas>
+        </div>
+        <p class="tag">Dangerous visits per POI type:</p>
+        <!-- diagram: column chart 2 -->
+        <div>
+            <canvas id="columnChart2"></canvas>
+        </div>
+        <p class="tag">Daily report:</p>
+        <!-- diagram: line chart 1 -->
+        <input type="date" id="month-selection">
+        <div>
+            <canvas id="lineChart1"></canvas>
+        </div>
+        <p class="tag">Hourly report:</p>
+        <!-- diagram: line chart 2 -->
+        <input type="date" id="date-selection">
+        <div>
+            <canvas id="lineChart2"></canvas>
+        </div>
+    </div>
+
     <!-- footer -->
     <%- include('./partials/footer.ejs') %>
 
@@ -335,19 +320,3 @@
     populateStatistics();
 
 </script>
-<script>
-    function openmodal(evt, modalName) {
-      var i, tabcontent, tablinks;
-      tabcontent = document.getElementsByClassName("tabcontent");
-      for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-      }
-      tablinks = document.getElementsByClassName("tablinks");
-      for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-      }
-      document.getElementById(modalName).style.display = "block";
-      evt.currentTarget.className += " active";
-    }
-    document.getElementById("defaultOpen").click();
-    </script>
