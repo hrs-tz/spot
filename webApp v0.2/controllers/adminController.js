@@ -174,22 +174,6 @@ module.exports.populateStatistics_get = async (req, res) => {
                   poiInfo: { $arrayElemAt: ["$poiInfo.types", 0] }
                 }
             },
-            { $lookup:
-                {
-                    from: 'positivecases',
-                    localField: 'user',
-                    foreignField: 'user',
-                    pipeline: [
-                        { "$sort" : { "date" : -1 }}
-                    ],
-                    as: 'testDate'
-                }
-            },
-            {
-                $set: {
-                  testDate: { $arrayElemAt: ["$testDate.date", 0] }
-                }
-            },
             {
                 $project: {
                   _id: 0,
@@ -329,22 +313,6 @@ module.exports.populateStatistics_get = async (req, res) => {
         results.visitsPerDay = await Visit.aggregate([
             { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
             { $match: { creationDate: { $gte: from, $lte: to} } },
-            { $lookup:
-                {
-                    from: 'positivecases',
-                    localField: 'user',
-                    foreignField: 'user',
-                    pipeline: [
-                        { "$sort" : { "date" : -1 }}
-                    ],
-                    as: 'testDate'
-                }
-            },
-            {
-                $set: {
-                  testDate: { $arrayElemAt: ["$testDate.date", 0] }
-                }
-            },
             {
                 $group: {
                     _id: "$creationDate",
@@ -358,6 +326,11 @@ module.exports.populateStatistics_get = async (req, res) => {
                     _id: 0,
                     date: "$_id",
                     totalVisits: 1
+                }
+            },
+            {
+                $sort: {
+                    date: 1
                 }
             }
         ]);
@@ -433,43 +406,32 @@ module.exports.populateStatistics_get = async (req, res) => {
                     date: "$_id",
                     totalVisits: 1
                 }
+            },
+            {
+                $sort: {
+                    date: 1
+                }
             }
         ]);
 
         // time selection
-        const selectedDate = new Date('2022-08-31T00:00:00.777+00:00').toISOString().split('T')[0];
+        const selectedDate = new Date('2022-08-28T00:00:00.777+00:00').toISOString().split('T')[0];
 
         // get visits per hour
         results.visitsPerHour = await Visit.aggregate([
             { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
             { $project: { 
-                    hour: { $hour: "$createdAt" },
+                    hour: { $toString: { $hour: "$createdAt" } },
                     user: 1,
                     poi: 1,
-                    createdAt: 1
+                    createdAt: 1,
+                    creationDate: 1
                 }
             },
-            { $addFields: { "creationDateHour":  }},
             { $match: { creationDate: { $eq: selectedDate } } },
-            { $lookup:
-                {
-                    from: 'positivecases',
-                    localField: 'user',
-                    foreignField: 'user',
-                    pipeline: [
-                        { "$sort" : { "date" : -1 }}
-                    ],
-                    as: 'testDate'
-                }
-            },
-            {
-                $set: {
-                  testDate: { $arrayElemAt: ["$testDate.date", 0] }
-                }
-            },
             {
                 $group: {
-                    _id: "$creationDate",
+                    _id: "$hour",
                     totalVisits: {
                     $count: {}
                     }
@@ -481,12 +443,26 @@ module.exports.populateStatistics_get = async (req, res) => {
                     date: "$_id",
                     totalVisits: 1
                 }
+            },
+            {
+                $sort: {
+                    date: 1
+                }
             }
         ]);
 
         // get visits made by positive cases per hour
         results.dangerousVisitsPerHour = await Visit.aggregate([
             { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
+            { $project: 
+                { 
+                    hour: { $toString: { $hour: "$createdAt" } },
+                    user: 1,
+                    poi: 1,
+                    createdAt: 1,
+                    creationDate: 1
+                }
+            },
             { $match: { creationDate: { $eq: selectedDate } } },
             { $lookup:
                 {
@@ -543,7 +519,7 @@ module.exports.populateStatistics_get = async (req, res) => {
             },
             {
                 $group: {
-                    _id: "$creationDate",
+                    _id: "$hour",
                     totalVisits: {
                     $count: {}
                     }
@@ -555,11 +531,22 @@ module.exports.populateStatistics_get = async (req, res) => {
                     date: "$_id",
                     totalVisits: 1
                 }
+            },
+            {
+                $sort: {
+                    date: 1
+                }
             }
         ]);
 
-        console.log(results.visitsPerHour);
-        console.log(results.dangerousVisitsPerHour);
+        // replace _ with space in poi types for readability
+        results.visitsPerType.forEach(item => {
+            item.poiInfo = item.poiInfo.replaceAll('_',' ');
+        });
+
+        results.dangerousVisitsPerType.forEach(item => {
+            item.poiInfo = item.poiInfo.replaceAll('_',' ');
+        });
 
         res.status(200).json({ results });
     }
