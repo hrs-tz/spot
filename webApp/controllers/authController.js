@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const Admin = require('../models/admin');
 const jwt = require('jsonwebtoken');
 
 // handle errors
@@ -14,6 +15,11 @@ const handleErrors = (err) => {
     // incorrect password
     if (err.message === 'incorrect password') {
         errors.password = 'that password is incorrect. Try again...'
+    }
+
+    // incorrect username
+    if (err.message === 'incorrect username') {
+        errors.username = 'that username is incorrect. Try again...';
     }
 
     // duplicate error code
@@ -37,9 +43,16 @@ const handleErrors = (err) => {
 
 const maxAge = 3 * 24 * 60 * 60; // validity duration: 3 days
 
-// create jwt
+// create jwt for user
 const createToken = (id) => {
     return jwt.sign({ id }, 'Web Project 2022 secret key!', {
+        expiresIn: maxAge
+    });
+}
+
+// create jwt for admin
+const createTokenAdmin = (id) => {
+    return jwt.sign({ id }, 'Web Project 2022 secret key for admin!', {
         expiresIn: maxAge
     });
 }
@@ -49,7 +62,21 @@ module.exports.signup_get = (req, res) => {
 };
 
 module.exports.login_get = (req, res) => {
-    res.render('login', { title: 'Log In '});
+    if (!res.locals.user) {
+        res.render('login', { title: 'Log In '});
+    }
+    else {
+        res.redirect('/home');
+    }
+};
+
+module.exports.loginAdmin_get = (req, res) => {
+    if (!res.locals.admin) {
+        res.render('loginAdmin', { title: 'Log In '});
+    }
+    else {
+        res.redirect('/dashboard');
+    }
 };
 
 module.exports.signup_post = (req, res) => {
@@ -81,6 +108,21 @@ module.exports.login_post = async (req, res) => {
         const token = createToken(user._id);
         res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
         res.status(200).json({ user: user._id } );
+    } 
+    catch (err) {
+        const errors = handleErrors(err);
+        res.json({errors});
+    }
+};
+
+module.exports.loginAdmin_post = async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        const admin = await Admin.login(username, password);
+        const token = createTokenAdmin(admin._id);
+        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+        res.status(200).json({ admin: admin._id } );
     } 
     catch (err) {
         const errors = handleErrors(err);

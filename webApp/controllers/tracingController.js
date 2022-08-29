@@ -72,15 +72,24 @@ module.exports.tracing_get = async (req, res) => {
                     let positiveCases = visit.positiveCases;
                     // iterate through report history
                     for (let positiveCase of positiveCases) {
+                        
+                        // initializations
                         let dayCeil = new Date();
+                        let dayFloor = new Date();
+
+                        // set time frame
                         dayCeil.setDate(visit.createdAt.getDate() + 7);
-                        if (positiveCase.date <= dayCeil && positiveCase.date >= visit.createdAt) {
+                        dayFloor.setDate(visit.createdAt.getDate() - 7);
+
+                        // check if report is within the given time frame
+                        if (positiveCase.date <= dayCeil && positiveCase.date >= dayFloor) {
                             secondCondition = true;
                             break; // positive case found, break from loop
                         }
                     }
                 }
                 if (secondCondition) {
+                    console.log('first condiditon met')
                     const poi = await Poi.findById(visit.poi);
                     const dangerousPoi = {
                         name: poi.name,
