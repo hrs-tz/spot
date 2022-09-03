@@ -9,58 +9,55 @@
 
     <!-- content -->
     <div class="report content">
-        <br> <br>
-        <div id="col1">
-            <form>
-                <label for="date">Date of positive test:</label>
-                <input type="date" id="date" name="date" value= "<%= currentDate %>" max="<%= currentDate %>" required>
-                <div class="date error"></div>
-      
-                <br><br>
-                
-                <p>Type of test:</p>
-                <div class="type error"></div>
+        <form>
+          <label for="date">Date of positive test:</label>
+          <input type="date" id="date" name="date" value= "<%= currentDate %>" max="<%= currentDate %>" required>
+          <div class="date error"></div>
 
-                <div class="custom-select" style="width:200px;" name="custom">
-                    <select name="select" id="name">
-                      <option name="testType" id="pcr" value="PCR">PCR Test</option>
-                      <option name="testType" id="rapid" value="RAPID">Rapid Test</option>
-                    </select>
-                  </div>
-                  <br>
-                <button class="primary-button">Submit</button>
-                <div class="user error"></div>
-              </form>
+          <br><br>
+          
+          <p>Type of test:</p>
+          <div class="type error"></div>
+          <div>
+            <select name="select" id="select">
+                <option value="PCR" name="testType" id="testType">PCR Test</option>
+                <option value="RAPID" name="testType" id="testType">RAPID TEST</option>
+            </select>
+          </div>
+          
+          <!-- <input type="radio" id="radid" name="testType" value="RAPID">
+            <label for="rapid">RAPID</label>
+            <input type="radio" id="pcr" name="testType" value="PCR">
+            <label for="pcr">PCR</label> -->
+          <button class="primary-button">Submit</button>
+          <div class="user error"></div>
+        </form>
       </div>
-    </div>
 
-      <div id="col2">
-            <img src="/public/img/report.svg" style="width: 90%;"></img>
-      </div>
-    </br>
-    
-    <footer class="footer" style="position:absolute">
-      Copyright © spot 2022
-      </footer>
-    
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
 </body>
 </html>
 
 <script>
   const form = document.querySelector('form');
-  console.log(form.custom);
   const userError = document.querySelector('.user.error');
   const dateError = document.querySelector('.date.error');
   const typeError = document.querySelector('.type.error');
+
   form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       // reset errors
       userError.textContent = '';
       dateError.textContent = '';
       typeError.textContent = '';
+
       // get the values of the form
       const date = form.date.value;
       const testType = form.select.value;
+
       try {
           const res = await fetch('/report', {
               method: 'POST',
@@ -83,83 +80,3 @@
       }
   });
 </script>
-<script>
-    var x, i, j, l, ll, selElmnt, a, b, c;
-    /*look for any elements with the class "custom-select":*/
-    x = document.getElementsByClassName("custom-select");
-    l = x.length;
-    for (i = 0; i < l; i++) {
-      selElmnt = x[i].getElementsByTagName("select")[0];
-      ll = selElmnt.length;
-      /*for each element, create a new DIV that will act as the selected item:*/
-      a = document.createElement("DIV");
-      a.setAttribute("class", "select-selected");
-      a.innerHTML = selElmnt.options[selElmnt.selectedIndex].innerHTML;
-      x[i].appendChild(a);
-      /*for each element, create a new DIV that will contain the option list:*/
-      b = document.createElement("DIV");
-      b.setAttribute("class", "select-items select-hide");
-      for (j = 1; j < ll; j++) {
-        /*for each option in the original select element,
-        create a new DIV that will act as an option item:*/
-        c = document.createElement("DIV");
-        c.innerHTML = selElmnt.options[j].innerHTML;
-        c.addEventListener("click", function(e) {
-            /*when an item is clicked, update the original select box,
-            and the selected item:*/
-            var y, i, k, s, h, sl, yl;
-            s = this.parentNode.parentNode.getElementsByTagName("select")[0];
-            sl = s.length;
-            h = this.parentNode.previousSibling;
-            for (i = 0; i < sl; i++) {
-              if (s.options[i].innerHTML == this.innerHTML) {
-                s.selectedIndex = i;
-                h.innerHTML = this.innerHTML;
-                y = this.parentNode.getElementsByClassName("same-as-selected");
-                yl = y.length;
-                for (k = 0; k < yl; k++) {
-                  y[k].removeAttribute("class");
-                }
-                this.setAttribute("class", "same-as-selected");
-                break;
-              }
-            }
-            h.click();
-        });
-        b.appendChild(c);
-      }
-      x[i].appendChild(b);
-      a.addEventListener("click", function(e) {
-          /*when the select box is clicked, close any other select boxes,
-          and open/close the current select box:*/
-          e.stopPropagation();
-          closeAllSelect(this);
-          this.nextSibling.classList.toggle("select-hide");
-          this.classList.toggle("select-arrow-active");
-        });
-    }
-    function closeAllSelect(elmnt) {
-      /*a function that will close all select boxes in the document,
-      except the current select box:*/
-      var x, y, i, xl, yl, arrNo = [];
-      x = document.getElementsByClassName("select-items");
-      y = document.getElementsByClassName("select-selected");
-      xl = x.length;
-      yl = y.length;
-      for (i = 0; i < yl; i++) {
-        if (elmnt == y[i]) {
-          arrNo.push(i)
-        } else {
-          y[i].classList.remove("select-arrow-active");
-        }
-      }
-      for (i = 0; i < xl; i++) {
-        if (arrNo.indexOf(i)) {
-          x[i].classList.add("select-hide");
-        }
-      }
-    }
-    /*if the user clicks anywhere outside the select box,
-    then close all select boxes:*/
-    document.addEventListener("click", closeAllSelect);
-    </script>

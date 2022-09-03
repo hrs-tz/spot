@@ -5,22 +5,13 @@
 <body>
     
     <!-- navigation -->
-    <% if (user) { %> 
-        <%- include('./partials/nav.ejs') %> 
-      <% } else { %> 
-        <div class="topnav-right">
-          <a href="/login">Login</a>
-          <a href="/signup">Get Started!</a>
-        </div>
-            <% } %> 
+    <%- include('./partials/nav.ejs') %> 
 
     <div>
         <h1>404 - OOPS!</h1>
         <h2>That page does not exist</h2>
     </div>
-    <div>
-        <img src="https://c.tenor.com/lx2WSGRk8bcAAAAC/pulp-fiction-john-travolta.gif" class="center" style="width:35%" >
-     </div>
+
     <!-- footer -->
     <%- include('./partials/footer.ejs') %>
 

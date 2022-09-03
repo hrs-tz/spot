@@ -38,7 +38,11 @@ const positiveCaseSchema = new Schema({
     },
     testType: {
         type: String,
-        required: [true, 'Type is required']
+        required: [true, 'Type is required'],
+        enum: {
+            values: ['PCR', 'RAPID'],
+            message: 'Select a valid test type'
+          } 
     }
 });
 

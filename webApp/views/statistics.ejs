@@ -51,55 +51,67 @@
 </html>
 
 <script>
-    // change post to populate-statistics => διαχωρισμός των στατιστικών που επιστρέφονται ανα είδος!!
+    // event handler for line chart 2 update
     async function postDate(event) {
         dateSelection.value = event.target.value;
 
-        // request statistics data
-        const res = await fetch('/populate-statistics', {
-            method: 'POST',
-            body: JSON.stringify({ from: startDate, to: endDate, selectedDate: dateSelection.value }),
-            headers: {'Content-Type': 'application/json' }
-        });
-        const data = await res.json();
+        try {
+            // request statistics data
+            const res = await fetch('/populate-chart-per-hour', {
+                method: 'POST',
+                body: JSON.stringify({ selectedDate: dateSelection.value }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
 
-        lineChart2Data.visits = fillZeroHours(data.results.visitsPerHour);
-        lineChart2Data.dangerousVisits = fillZeroHours(data.results.dangerousVisitsPerHour);
+            lineChart2Data.visits = fillZeroHours(data.results.visitsPerHour);
+            lineChart2Data.dangerousVisits = fillZeroHours(data.results.dangerousVisitsPerHour);
 
-        lineChart2.data.datasets[0].data = lineChart2Data.visits;
-        lineChart2.data.datasets[1].data = lineChart2Data.dangerousVisits;
-        lineChart2.update();
+            lineChart2.data.datasets[0].data = lineChart2Data.visits;
+            lineChart2.data.datasets[1].data = lineChart2Data.dangerousVisits;
+            lineChart2.update();
+        }
+        catch (err) {
+            console.log(err);
+        }
     }
 
+    // event handler for line chart 1 update (start date changed)
     async function postStartDate(event) {
         startDateSelection.value = event.target.value;
         startDate = startDateSelection.value;
 
-        // request statistics data
-        const res = await fetch('/populate-statistics', {
-            method: 'POST',
-            body: JSON.stringify({ from: startDate, to: endDate, selectedDate: dateSelection.value }),
-            headers: {'Content-Type': 'application/json' }
-        });
-        const data = await res.json();
+        try {
+            // request statistics data
+            const res = await fetch('/populate-chart-per-day', {
+                method: 'POST',
+                body: JSON.stringify({ from: startDate, to: endDate }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
 
-        // fill zero visits
-        lineChart1Data.visits = fillZeroDates(startDate, endDate, data.results.visitsPerDay);
-        lineChart1Data.dangerousVisits = fillZeroDates(startDate, endDate, data.results.dangerousVisitsPerDay);
+            // fill zero visits
+            lineChart1Data.visits = fillZeroDates(startDate, endDate, data.results.visitsPerDay);
+            lineChart1Data.dangerousVisits = fillZeroDates(startDate, endDate, data.results.dangerousVisitsPerDay);
 
-        lineChart1.data.datasets[0].data = lineChart1Data.visits;
-        lineChart1.data.datasets[1].data = lineChart1Data.dangerousVisits;
-        lineChart1.update();
+            lineChart1.data.datasets[0].data = lineChart1Data.visits;
+            lineChart1.data.datasets[1].data = lineChart1Data.dangerousVisits;
+            lineChart1.update();
+        } 
+        catch (err) {
+            console.log(err);
+        }
     }
 
+    // event handler for line chart 1 update (end date changed)
     async function postEndDate(event) {
         endDateSelection.value = event.target.value;
         endDate = endDateSelection.value;
 
         // request statistics data
-        const res = await fetch('/populate-statistics', {
+        const res = await fetch('/populate-chart-per-day', {
             method: 'POST',
-            body: JSON.stringify({ from: startDate, to: endDate, selectedDate: dateSelection.value }),
+            body: JSON.stringify({ from: startDate, to: endDate }),
             headers: {'Content-Type': 'application/json' }
         });
         const data = await res.json();
@@ -113,32 +125,36 @@
         lineChart1.update();
     }
 
+    // function to fill empty dates with zero visits
     function fillZeroDates(startDate, endDate, data) {
         let index=0;
-            let tempDate = new Date(startDate + 'T00:00:00.777+00:00');
-            let endDateDateFormat = new Date(endDate + 'T00:00:00.777+00:00');
-            let filledData = [];
+        let tempDate = new Date(startDate + 'T00:00:00.777+00:00');
+        let endDateDateFormat = new Date(endDate + 'T00:00:00.777+00:00');
+        let filledData = [];
 
-            while (tempDate <= endDateDateFormat) {
-                let item = { totalVisits: 0, date: '' };
-                if (index < data.length) {
-                    if(data[index].date === tempDate.toISOString().split('T')[0]) { 
-                        item.date = data[index].date;
-                        item.totalVisits = data[index].totalVisits;
-                        filledData.push(item);
-                        index++;
-                    }
-                    else {
-                    item.totalVisits = 0;
-                    item.date = tempDate.toISOString().split('T')[0];
+        // loop through given time box
+        while (tempDate <= endDateDateFormat) {
+            let item = { totalVisits: 0, date: '' };
+            // check for remaining visit records
+            if (index < data.length) {
+                if(data[index].date === tempDate.toISOString().split('T')[0]) { 
+                    item.date = data[index].date;
+                    item.totalVisits = data[index].totalVisits;
                     filledData.push(item);
-                    }
+                    index++;
                 }
                 else {
-                    item.totalVisits = 0;
-                    item.date = tempDate.toISOString().split('T')[0];
-                    filledData.push(item);
+                item.totalVisits = 0;
+                item.date = tempDate.toISOString().split('T')[0];
+                filledData.push(item);
                 }
+            }
+            // no more visit records
+            else {
+                item.totalVisits = 0;
+                item.date = tempDate.toISOString().split('T')[0];
+                filledData.push(item);
+            }
             
             tempDate.setDate(tempDate.getDate() + 1);
         }
@@ -146,13 +162,16 @@
         return filledData;
     }
 
+    // function to fill empty hours with zero visits
     function fillZeroHours(data) {
         let index=0;
         let hour = 0;
         let filledData = [];
 
+        // loop through hours of given date
         while (hour <= 23) {
             let item = { totalVisits: 0, date: '' };
+            // check for remaining visit records
             if (index < data.length) {
                 if(data[index].date == hour) { 
                     item.date = data[index].date;
@@ -166,6 +185,7 @@
                 filledData.push(item);
                 }
             }
+            // no more visit records
             else {
                 item.totalVisits = 0;
                 item.date = hour + '';
@@ -205,11 +225,7 @@
         try {
 
             // request statistics data
-            const res = await fetch('/populate-statistics', {
-              method: 'POST',
-              body: JSON.stringify({ from: startDate, to: endDate, selectedDate: dateSelection.value }),
-              headers: {'Content-Type': 'application/json' }
-            });
+            const res = await fetch('/populate-statistics');
             const data = await res.json();
             
             // get data
@@ -219,11 +235,26 @@
             columnChart1Data = data.results.visitsPerType;
             columnChart2Data = data.results.dangerousVisitsPerType;
 
+            // request data for line charts
+            const resPerDay = await fetch('/populate-chart-per-day', {
+                method: 'POST',
+                body: JSON.stringify({ from: startDate, to: endDate }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const dataPerDay = await resPerDay.json();
+
+            const resPerHour = await fetch('/populate-chart-per-hour', {
+                method: 'POST',
+                body: JSON.stringify({ selectedDate: dateSelection.value }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const dataPerHour = await resPerHour.json();
+
             // fill zero visits
-            lineChart1Data.visits = fillZeroDates(startDate, endDate, data.results.visitsPerDay);
-            lineChart1Data.dangerousVisits = fillZeroDates(startDate, endDate, data.results.dangerousVisitsPerDay);
-            lineChart2Data.visits = fillZeroHours(data.results.visitsPerHour);
-            lineChart2Data.dangerousVisits = fillZeroHours(data.results.dangerousVisitsPerHour);
+            lineChart1Data.visits = fillZeroDates(startDate, endDate, dataPerDay.results.visitsPerDay);
+            lineChart1Data.dangerousVisits = fillZeroDates(startDate, endDate, dataPerDay.results.dangerousVisitsPerDay);
+            lineChart2Data.visits = fillZeroHours(dataPerHour.results.visitsPerHour);
+            lineChart2Data.dangerousVisits = fillZeroHours(dataPerHour.results.dangerousVisitsPerHour);
 
             // column chart 1
             const columnChartData1 = {

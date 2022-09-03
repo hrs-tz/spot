@@ -5,349 +5,74 @@
 <body>
     
     <!-- navigation -->
-    <div class="topnav-right" style="margin-bottom: 16px;">
-        <a href="/logout" >Logout</a>
-    </div>
+    <%- include('./partials/nav.ejs') %> 
+
     <!-- content -->
-    <div class="tab" style="width:100%">
-        <button class="tablinks" onclick="openmodal(event, 'Visits per POI type')"id="defaultOpen">Visits per POI type</button>
-        <button class="tablinks" onclick="openmodal(event, 'Dangerous visits per POI type')">Dangerous visits per POI type</button>
-        <button class="tablinks" onclick="openmodal(event, 'Daily report')">Daily report</button>
-        <button class="tablinks" onclick="openmodal(event, 'Hourly report')" style="width:100%">Hourly report</button>
-      </div>
-      <div id="Visits per POI type" class="tabcontent">
-        <p class="tag">Visits per POI type:</p>
-        <div>
-            <canvas id="columnChart1"></canvas>
-        </div>
-      </div>
-      <div id="Dangerous visits per POI type" class="tabcontent">
-        <p class="tag">Dangerous visits per POI type:</p>
-        
-        <div>
-            <canvas id="columnChart2"></canvas>
-        </div>
-      </div>
-      
-      <div id="Daily report" class="tabcontent">
-        <p class="tag">Daily report:</p>
-        <!-- diagram: line chart 1 -->
-        <input type="date" id="month-selection">
-        <div>
-            <canvas id="lineChart1"></canvas>
-        </div>
-      </div>
-      <div id="Hourly report" class="tabcontent">
-        <p class="tag">Hourly report:</p>
-        <!-- diagram: line chart 2 -->
-        <input type="date" id="date-selection">
-        <div>
-            <canvas id="lineChart2"></canvas>
-        </div>
-      </div>
-    <div>
-        <p class="tag">Total number of visits:</p>
-        <p class="info total-visits"></p>
-        <p class="tag">Total number of positive cases reported:</p>
-        <p class="info total-cases"></p>
-        <p class="tag">Total number of visits made by positive cases:</p>
-        <p class="info visits-of-positives"></p>
-        
-        
+    <h1>Hi admin!</h1>
+    <div class="login content">
+        <form>
+            <label for="numberOfUsers">Number of users:</label>
+            <input type="number" id="numberOfUsers">
+            <div class="number error"></div>
+            <label for="dateSelectionStart">Visits from:</label>
+            <input type="date" id="dateSelectionStart">
+            <div class="startDate error"></div>
+            <label for="dateSelectionEnd">Visits to:</label>
+            <input type="date" id="dateSelectionEnd">
+            <div class="endDate error"></div>
+            <button>Run</button>
+            <div class="message"></div>
+        </form>
+    </div>
+    
     <!-- footer -->
     <%- include('./partials/footer.ejs') %>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </body>
 </html>
 
 <script>
+    const form = document.querySelector('form');
+    const numberError = document.querySelector('.number.error');
+    const startDateError = document.querySelector('.startDate.error');
+    const endDateError = document.querySelector('.endDate.error');
+    const message = document.querySelector('.message');
 
-    function fillZeroDates(startDate, endDate, data) {
-        let index=0;
-            let tempDate = new Date(startDate);
-            let filledData = [];
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            while (tempDate <= endDate) {
-                let item = { totalVisits: 0, date: '' };
-                if (index < data.length) {
-                    if(data[index].date === tempDate.toISOString().split('T')[0]) { 
-                        item.date = data[index].date;
-                        item.totalVisits = data[index].totalVisits;
-                        filledData.push(item);
-                        index++;
-                    }
-                    else {
-                    item.totalVisits = 0;
-                    item.date = tempDate.toISOString().split('T')[0];
-                    filledData.push(item);
-                    }
-                }
-                else {
-                    item.totalVisits = 0;
-                    item.date = tempDate.toISOString().split('T')[0];
-                    filledData.push(item);
-                }
-            
-            tempDate.setDate(tempDate.getDate() + 1);
-        }
-        
-        return filledData;
-    }
+        // reset errors
+        numberError.textContent = '';
+        startDateError.textContent = '';
+        endDateError.textContent = '';
 
-    function fillZeroHours(data) {
-        let index=0;
-        let hour = 0;
-        let filledData = [];
+        // get the values from the form
+        const numberOfUsers = form.numberOfUsers.value
+        const startDate = form.dateSelectionStart.value;
+        const endDate = form.dateSelectionEnd.value;
 
-        while (hour <= 23) {
-            let item = { totalVisits: 0, date: '' };
-            if (index < data.length) {
-                if(data[index].date == hour) { 
-                    item.date = data[index].date;
-                    item.totalVisits = data[index].totalVisits;
-                    filledData.push(item);
-                    index++;
-                }
-                else {
-                item.totalVisits = 0;
-                item.date = hour + '';
-                filledData.push(item);
-                }
-            }
-            else {
-                item.totalVisits = 0;
-                item.date = hour + '';
-                filledData.push(item);
-            }
-        
-            hour++;
-        }
-
-        return filledData;
-    }
-
-    const totalNumberOfVisits = document.querySelector('.total-visits');
-    const totalNumberOfCases = document.querySelector('.total-cases');
-    const totalNumberOfVisitsOfPositives = document.querySelector('.visits-of-positives');
-    const dateSelection = document.getElementById('date-selection');
-    const monthSelection = document.getElementById('month-selection');
-    console.log(dateSelection.value);
-    let columnChart1Data = [];
-    let columnChart2Data = [];
-    //let lineChart1Data1 = [];
-    //let lineChart1Data2 = [];
-    let lineChart2Data1 = [];
-    let lineChart2Data2 = [];
-
-    let lineChart1Data = { visits: [], dangerousVisits: [] };
-    let lineChart2Data = { visits: [], dangerousVisits: [] };
-    const startDate = new Date('2022-08-01T00:00:00.777+00:00');
-    const endDate = new Date('2022-08-31T00:00:00.777+00:00');
-
-    async function populateStatistics() {
         try {
-
-            // request statistics data
-            const url = '/populate-statistics';
-            const res = await fetch(url);
+            const res = await fetch('/add-system-data', {
+                method: 'POST',
+                body: JSON.stringify({ numberOfUsers: numberOfUsers, startDateInput: startDate, endDateInput: endDate }),
+                headers: {'Content-Type': 'application/json' }
+            });
             const data = await res.json();
-            
-            // get data
-            totalNumberOfVisits.textContent = data.results.totalVisits;
-            totalNumberOfCases.textContent = data.results.totalCases;
-            totalNumberOfVisitsOfPositives.textContent = data.results.visitsOfPositives;
-            columnChart1Data = data.results.visitsPerType;
-            columnChart2Data = data.results.dangerousVisitsPerType;
 
-            // fill zero visits
-            lineChart1Data.visits = fillZeroDates(startDate, endDate, data.results.visitsPerDay);
-            lineChart1Data.dangerousVisits = fillZeroDates(startDate, endDate, data.results.dangerousVisitsPerDay);
-            lineChart2Data.visits = fillZeroHours(data.results.visitsPerHour);
-            lineChart2Data.dangerousVisits = fillZeroHours(data.results.dangerousVisitsPerHour);
-
-            // column chart 1
-            const columnChartData1 = {
-                datasets: [{
-                    label: 'Visits',
-                    backgroundColor: 'rgb(255, 99, 132)',
-                    borderColor: 'rgb(255, 99, 132)',
-                    data: columnChart1Data,
-                }]
-            };
-
-            const configColumnChart1 = {
-                type: 'bar',
-                data: columnChartData1,
-                options: {
-                    responsive: true,
-                    plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Visits per POI type'
-                    }
-                    },
-                    parsing: {
-                        xAxisKey: 'poiInfo',
-                        yAxisKey: 'totalVisits'
-                    }
-                }
-            };
-
-            const columnChart1 = new Chart(
-                document.getElementById('columnChart1'),
-                configColumnChart1
-            );
-
-            // column chart 2
-            const columnChartData2 = {
-                datasets: [{
-                    label: 'Visits',
-                    backgroundColor: 'rgb(255, 99, 132)',
-                    borderColor: 'rgb(255, 99, 132)',
-                    data: columnChart2Data,
-                }]
-            };
-
-            const configColumnChart2 = {
-                type: 'bar',
-                data: columnChartData2,
-                options: {
-                    responsive: true,
-                    plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Visits by positive cases per POI type'
-                    }
-                    },
-                    parsing: {
-                        xAxisKey: 'poiInfo',
-                        yAxisKey: 'totalVisits'
-                    }
-                }
-            };
-
-            const columnChart2 = new Chart(
-                document.getElementById('columnChart2'),
-                configColumnChart2
-            );
-
-            // line chart 1
-            const lineChartData1 = {
-                datasets: [
-                    {
-                        label: 'Visits',
-                        data: lineChart1Data.visits,
-                        backgroundColor: 'rgb(255, 99, 132)',
-                        borderColor: 'rgb(255, 99, 132)',
-                    },
-                    {
-                        label: 'Visits by positive cases',
-                        data: lineChart1Data.dangerousVisits,
-                        backgroundColor: 'rgb(200, 88, 152)',
-                        borderColor: 'rgb(200, 88, 152)',
-                    }
-                ]
-            };
-            
-            const configLineChart1 = {
-                type: 'line',
-                data: lineChartData1,
-                options: {
-                    responsive: true,
-                    plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Daily report'
-                    }
-                    },
-                    parsing: {
-                        xAxisKey: 'date',
-                        yAxisKey: 'totalVisits'
-                    }
-                },
-            };
-
-            const lineChart1 = new Chart(
-                document.getElementById('lineChart1'),
-                configLineChart1
-            );
-
-            // line chart 2
-            const lineChartData2 = {
-                datasets: [
-                    {
-                        label: 'Visits',
-                        data: lineChart2Data.visits,
-                        backgroundColor: 'rgb(255, 99, 132)',
-                        borderColor: 'rgb(255, 99, 132)',
-                    },
-                    {
-                        label: 'Visits by positive cases',
-                        data: lineChart2Data.dangerousVisits,
-                        backgroundColor: 'rgb(200, 88, 152)',
-                        borderColor: 'rgb(200, 88, 152)',
-                    }
-                ]
-            };
-            
-            const configLineChart2 = {
-                type: 'line',
-                data: lineChartData2,
-                options: {
-                    responsive: true,
-                    plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Hourly report'
-                    }
-                    },
-                    parsing: {
-                        xAxisKey: 'date',
-                        yAxisKey: 'totalVisits'
-                    }
-                },
-            };
-
-            const lineChart2 = new Chart(
-                document.getElementById('lineChart2'),
-                configLineChart2
-            );
+            if (data.errors) {
+                console.log(data.errors);
+                numberError.textContent = data.errors.number;
+                startDateError.textContent = data.errors.startDate;
+                endDateError.textContent = data.errors.endDate
+                message.textContent = data.errors.general;
+            }
+            if (data.message) {
+                message.textContent = data.message;
+                setTimeout(() => {  location.assign('/dashboard'); }, 5000); // redirect after 5 sec
+            }
         }
         catch (err) {
             console.log(err);
         }
-    }
-
-    populateStatistics();
-
+    })
 </script>
-<script>
-    function openmodal(evt, modalName) {
-      var i, tabcontent, tablinks;
-      tabcontent = document.getElementsByClassName("tabcontent");
-      for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-      }
-      tablinks = document.getElementsByClassName("tablinks");
-      for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-      }
-      document.getElementById(modalName).style.display = "block";
-      evt.currentTarget.className += " active";
-    }
-    document.getElementById("defaultOpen").click();
-    </script>

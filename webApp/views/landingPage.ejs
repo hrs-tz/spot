@@ -5,19 +5,13 @@
 <body>
 
     <!-- navigation -->
-    <% if (user) { %> 
-      <%- include('./partials/nav.ejs') %> 
-    <% } else { %> 
-      <div class="topnav-right">
-        <a href="/login">Login</a>
-        <a href="/signup">Get Started!</a>
-      </div>
-          <% } %> 
+    <%- include('./partials/nav.ejs') %> 
 
     <!-- content -->
- <div>
-    <img src="https://raw.githubusercontent.com/hrs-tz/spot/7dbe50b8143660bf53b74ae77ed36a1fb992657b/styles/img/work-illustration.svg" class="center" >
- </div>
+    <div>
+        <h1>Landing Page</h1>
+        <h2>Get Started!</h2>
+    </div>
 
     <!-- footer -->
     <%- include('./partials/footer.ejs') %>

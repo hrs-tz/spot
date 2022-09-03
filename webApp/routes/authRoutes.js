@@ -11,6 +11,10 @@ router.get('/login', authController.login_get);
 
 router.post('/login', authController.login_post);
 
+router.get('/login-admin', authController.loginAdmin_get);
+
+router.post('/login-admin', authController.loginAdmin_post)
+
 router.get('/logout', authController.logout_get);
 
 module.exports = router;

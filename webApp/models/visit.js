@@ -11,7 +11,20 @@ const visitSchema = new Schema({
         type: Schema.Types.ObjectId, ref: 'Poi',
         required: true
     },
-    estimation: Number
+    estimation: {
+        type: Number,
+        validate: {
+            validator: function(num) {
+                const valid = (Number.isInteger(num) && num > 1);
+                return valid;
+            },
+            message: 'Invalid estimation: estimation must be a positive integer'
+        }
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 }, { timestamps: true })
 
 // model

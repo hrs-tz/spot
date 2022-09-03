@@ -6,37 +6,40 @@
     
     <!-- navigation -->
     <%- include('./partials/nav.ejs') %>
-    <br>
+
     <!-- content -->
-    <div class="tab" style="width:100%">
-        <button class="tablinks" onclick="openmodal(event, 'Positive Tests')"id="defaultOpen">Positive Tests</button>
-        <button class="tablinks" onclick="openmodal(event, 'List of Visits')">List of Visits</button>
-        <button class="tablinks" onclick="openmodal(event, 'Profile Settings')">Profile Settings</button>
-      </div>
-      
-      <div id="Positive Tests" class="tabcontent">
-        <h3>Positive Tests</h3>
-        <div class="positivecases content">
-            <% if (positiveCases.length > 0) { %>
-                <ol>
-                    <% positiveCases.forEach(positiveCase => { %>
-                        <li>
-                            <h5>Date of positive test:</h5>
-                            <p class="date"><%= positiveCase.date %></p>
-                            <h5>Type of test:</h5>
-                            <p class="type"><%= positiveCase.testType %></p>
-                        </li>
-                    <% }) %>
-                </ol>
-            <% } else { %>
-                <p>Empty List</p>
-            <% } %> 
-        </div>
-      </div>
-      
-      <div id="List of Visits" class="tabcontent">
-        <h3>List of Visits</h3>
-        
+    <div class="editProfile content">
+        <form>
+            <label for="username">username:</label>
+            <input type="text" id="username" name="username" placeholder="<%= user.username %> ">
+            <div class="username error"></div>
+            <label for="oldpassword">old password:</label>
+            <input type="password" id="oldpassword" name="oldpassword" required>
+            <div class="oldpassword error"></div>
+            <label for="password">password:</label>
+            <input type="password" id="password" name="password">
+            <div class="password error"></div>
+            <button>Update</button>
+        </form>
+    </div>
+
+    <div class="positivecases content">
+        <% if (positiveCases.length > 0) { %>
+            <ol>
+                <% positiveCases.forEach(positiveCase => { %>
+                    <li>
+                        <h5>Date of positive test:</h5>
+                        <p class="date"><%= positiveCase.date %></p>
+                        <h5>Type of test:</h5>
+                        <p class="type"><%= positiveCase.testType %></p>
+                    </li>
+                <% }) %>
+            </ol>
+        <% } else { %>
+            <p>Empty List</p>
+        <% } %> 
+    </div>
+
     <div class="visits content">
         <% if (pois.length > 0) { %>
             <% pois.forEach(poi => { %>
@@ -52,25 +55,7 @@
             <p>Empty List</p>
         <% } %> 
     </div>
-      </div>
-      
-      <div id="Profile Settings" class="tabcontent">
-        <h3>Profile Settings</h3>
-        <div class="editProfile content">
-            <form>
-                <label for="username">username:</label>
-                <input type="text" id="username" name="username" placeholder="<%= user.username %> ">
-                <div class="username error"></div>
-                <label for="oldpassword">old password:</label>
-                <input type="password" id="oldpassword" name="oldpassword" required>
-                <div class="oldpassword error"></div>
-                <label for="password">password:</label>
-                <input type="password" id="password" name="password">
-                <div class="password error"></div>
-                <button>Update</button>
-            </form>
-        </div>
-      </div>
+
     <!-- footer -->
     <%- include('./partials/footer.ejs') %>
 
@@ -103,7 +88,7 @@
                 headers: {'Content-Type': 'application/json' }
             });
             const data = await res.json();
-            console.log(data);
+
             if (data.errors) {
                 usernameError.textContent = data.errors.username;
                 oldPasswordError.textContent = data.errors.oldPassword;
@@ -118,20 +103,3 @@
         }
     });
 </script>
-<script>
-    function openmodal(evt, modalName) {
-      var i, tabcontent, tablinks;
-      tabcontent = document.getElementsByClassName("tabcontent");
-      for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-      }
-      tablinks = document.getElementsByClassName("tablinks");
-      for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-      }
-      document.getElementById(modalName).style.display = "block";
-      evt.currentTarget.className += " active";
-    }
-    document.getElementById("defaultOpen").click();
-    </script>
-       

@@ -1,8 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
-const Poi = require('./models/poi');
-const Visit = require('./models/visit');
 const authRoutes = require('./routes/authRoutes');
 const cookieParser = require('cookie-parser');
 const { requireAuth, requireAdminAuth, checkUser } = require('./middleware/authMiddleware');
@@ -96,28 +94,6 @@ app.get('/add-admin', (req, res) => {
         });
 })
 
-// test get all documents from db
-app.get('/all-pois', (req, res) => {
-    Poi.find()
-        .then((result) => {
-            res.json({ result });
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-});
-
-// app.get('/available-pois', (req, res) => {
-//     const radians = 5/6371; // radians = distance / earth radius => km radians = distance in km / 6371
-//     Poi.find({ coordinates : { $near : [ -73.9667, 40.78 ], $maxDistance: radians } })
-//         .then((result) => {
-//             res.json({ result });
-//         })
-//         .catch((err) => {
-//             console.log(err);
-//         });
-// });
-
 // routes
 
 app.get('*', checkUser); // get user id for get requests
@@ -131,24 +107,11 @@ app.use(authRoutes);
 
 // protected routes
 
-// test db save visit
-app.get('/add-visit', requireAuth, (req, res) => {
-    const visit = new Visit({
-        user: res.locals.user,
-        poi: "6309ee6431c4798171bdaa3d",
-        estimation: 2
-    });
-
-    visit.save()
-        .then((result) => {
-            res.send(result);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-})
-
 app.get('/home', requireAuth, homeController.home_get);
+
+app.post('/home', requireAuth, homeController.home_post);
+
+app.post('/add-visit', requireAuth, homeController.addVisit_post);
 
 app.get('/report', requireAuth, reportController.report_get);
 
@@ -170,7 +133,13 @@ app.delete('/delete-all-pois', requireAdminAuth, adminController.deleteAllPois_d
 
 app.get('/statistics', requireAdminAuth, adminController.statistics_get);
 
-app.post('/populate-statistics', requireAdminAuth, adminController.populateStatistics_post);
+app.get('/populate-statistics', requireAdminAuth, adminController.populateStatistics_get);
+
+app.post('/populate-chart-per-day', requireAdminAuth, adminController.populateChartPerDay_post);
+
+app.post('/populate-chart-per-hour', requireAdminAuth, adminController.populateChartPerHour_post);
+
+app.post('/add-system-data', requireAdminAuth, adminController.addSystemData_post);
 
 // 404 page
 app.use((req, res) => {

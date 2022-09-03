@@ -41,7 +41,7 @@ const handleErrors = (err) => {
     return errors;
 }
 
-const maxAge = 3 * 24 * 60 * 60; // validity duration: 3 days
+const maxAge = 1 * 24 * 60 * 60; // validity duration: 1 day
 
 // create jwt for user
 const createToken = (id) => {

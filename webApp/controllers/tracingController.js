@@ -57,8 +57,8 @@ module.exports.tracing_get = async (req, res) => {
                 // check if the poi matches the poi of a positive case
                 if (visit.poi.equals(userVisit.poi)) {
                     // variables for checking if the user contacted the positive case (+/- two hours)
-                    let hourCeil = new Date();
-                    let hourFloor = new Date();
+                    let hourCeil = new Date(visit.createdAt);
+                    let hourFloor = new Date(visit.createdAt);
                     hourCeil.setHours(visit.createdAt.getHours() + 2);
                     hourFloor.setHours(visit.createdAt.getHours() - 2);
 
@@ -74,8 +74,8 @@ module.exports.tracing_get = async (req, res) => {
                     for (let positiveCase of positiveCases) {
                         
                         // initializations
-                        let dayCeil = new Date();
-                        let dayFloor = new Date();
+                        let dayCeil = new Date(visit.createdAt);
+                        let dayFloor = new Date(visit.createdAt);
 
                         // set time frame
                         dayCeil.setDate(visit.createdAt.getDate() + 7);
@@ -89,7 +89,6 @@ module.exports.tracing_get = async (req, res) => {
                     }
                 }
                 if (secondCondition) {
-                    console.log('first condiditon met')
                     const poi = await Poi.findById(visit.poi);
                     const dangerousPoi = {
                         name: poi.name,

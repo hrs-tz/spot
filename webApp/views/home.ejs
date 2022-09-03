@@ -9,138 +9,363 @@
 
     <!-- content -->
 
-    <!-- <div id="map"></div> -->
+    <div id="map"></div>
 
     <!-- leaflet js -->
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
     integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
     crossorigin=""></script>
 
-<div id="map"></div>
+    <!-- leaflet-control-search -->
+    <script src="/leaflet-search/src/leaflet-search.js"></script>
 
-<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.2/leaflet-search.src.js" integrity="sha512-V+GL/y/SDxveIQvxnw71JKEPqV2N+RYrUlf6os3Ru31Yhnv2giUsPadRuFtgmIipiXFBc+nCGMHPUJQc6uxxOA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        // function to check if a poi is within 20 meters from user's location - haversine formula to calculate the great-circle distance between two points
+        // code credits: https://www.movable-type.co.uk/scripts/latlong.html
+        const checkDistance = (lat1, lon1, lat2, lon2) => {
+            
+            const R = 6371e3; // metres
+            const φ1 = lat1 * Math.PI/180; // φ, λ in radians
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
 
-<script>
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-    function setMarkers(results) {
-        markersLayer.remove();
-        resultsLayer.clearLayers();
-        results.forEach((result) => {
-            data.forEach(poi => {
-                console.log(poi);
-                if (poi.type === result.text) {
-                    const newMarker = L.marker(poi.loc);
-                    newMarker.bindPopup(`${poi.title} \n ${result.text}`);
-                    resultsLayer.addLayer(newMarker);
-                }
-            })
-        });
-        //map.fitBounds(resultsLayer.getBounds());
-    }
+            const distance = (R * c); // distance in m
 
-    let map = L.map('map');
-
-    let tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-    map.addLayer(tiles);
-
-    map.setView([38.2462420, 21.7350847], 12);
-
-    let marker = L.marker ([38.246242, 21.7350847]);
-    marker.addTo(map);
-    marker.bindPopup("<b>Πλατεία Γεωργίου</b>");
-
-    let data = [
-        {
-            loc: [38.2466877, 21.7352181],
-            title: "Zizu",
-            type: "cafe"
-        },
-        {
-            loc: [38.246187, 21.7352598],
-            title: "Butter Batlers",
-            type: "cafe"
-        },
-        {
-            loc: [38.35775, 21.74876],
-            title: "Butter Batler",
-            type: "crepes"
+            return distance <= 20;
         }
-    ];
 
-    // Create layer groups
-    var markersLayer = new L.LayerGroup(); //layer contain searched elements
-    var resultsLayer = L.featureGroup();
+        // function to form popups and colour pins
+        function formPopup(poi) {
 
-    map.addLayer(markersLayer);
-    map.addLayer(resultsLayer);
+            // get currrent day and time
+            const currentDate = new Date();
+            let timeFloor = new Date();
+            let hour = currentDate.getHours();
+            let day = currentDate.getDay();
+            // reform days -> 0 = Monday, 1 = Tuesday, 2 = Wednesday, ... , Sunday = 6
+            if (day === 0) {
+                day = 6
+            }
+            else {
+                day-- ;
+            }
 
-    // Create array to hold potential results
-    let results = [];
+            // replace _ with space for readability
+            let types = [];
+            poi.types.forEach(type => {
+                type = type.replaceAll('_', ' ');
+                types.push(type);
+            });
 
-    // Create search control
-    var controlSearch = new L.Control.Search({
-    position: "topright",
-    layer: markersLayer,
-    propertyName: 'type',
-    initial: false,
-    zoom: 12,
-    marker: false,
-    tipAutoSubmit: false,
-    // hijack buildtip function, push results to array
-    buildTip: (text, loc, name) => {
-        results.push({ loc, text, name });
-        const tip = L.DomUtil.create("div");
-        tip.innerHTML = text;
-        L.DomEvent.disableClickPropagation(tip)
-        .on(tip, "click", L.DomEvent.stop, controlSearch)
-        .on(
-            tip,
-            "click",
-            function (e) {
-            controlSearch._input.value = text;
-            controlSearch._handleAutoresize();
-            controlSearch._input.focus();
-            controlSearch._hideTooltip();
-            controlSearch._handleSubmit();
-            setMarkers(results);
-            results = [];
-            },
-            controlSearch
-        );
-        return tip;
-    },
-    moveToLocation: results.length
-        ? () => {}
-        : L.Control.Search._defaultMoveToLocation
-    });
+            // check if current popularity is available and form text popup
+            let popup = { text: '', pin: greenPin};
+            timeFloor.setHours(currentDate.getHours() - 2);
+            if (poi.current_popularity && new Date(poi.updatedAt) >= timeFloor) {
+                if (checkDistance(poi.coordinates.lat, poi.coordinates.lng, position.lat, position.lng)) {
+                    popup.text = `<b>Name:</b> ${poi.name} <br>
+                    <b>Type:</b> ${types} <br>
+                    <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>
+                    <b>Current popularity:</b> ${poi.current_popularity} <br>
+                    <hr>
+                    <input type="text" id="estimation" name="estimation"><button onclick="addVisit()"><span class="material-icons">add_location_alt</span></button> <br>
+                    <div id="poiId" name="poiId" style="display: none">${poi._id}</div>
+                    <div class="estimation error"></div>`;
+                }
+                else {
+                    popup.text = `<b>Name:</b> ${poi.name} <br>
+                    <b>Type:</b> ${types} <br>
+                    <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>
+                    <b>Current popularity:</b> ${poi.current_popularity} <br>`;
+                }
+                
+            }
+            else {
+                if (checkDistance(poi.coordinates.lat, poi.coordinates.lng, position.lat, position.lng)) {
+                    popup.text = `<b>Name:</b> ${poi.name} <br>
+                    <b>Type:</b> ${types} <br>
+                    <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>
+                    <hr>
+                    <input type="text" id="estimation" name="estimation"><button onclick="addVisit()"><span class="material-icons">add_location_alt</span></button> <br>
+                    <div id="poiId" name="poiId" style="display: none">${poi._id}</div>
+                    <div class="estimation error"></div>`;
+                }
+                else {
+                    popup.text = `<b>Name:</b> ${poi.name} <br>
+                    <b>Type:</b> ${types} <br>
+                    <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>`;
+                }
+                
+            }
 
-map.addControl(controlSearch);
+            // get max popularity and calculate popularity percentage
+            const maxPopularity = Math.max(...poi.populartimes[day].data);
+            const popularityPercentage = poi.populartimes[day].data[hour] / maxPopularity;
+            // colour pin based on poi's popularity percentage: 0-32% green, 33-65% orange, 66%+ red
+            if (popularityPercentage <= 0.32) {
+                popup.pin = greenPin;
+            }
+            else if (popularityPercentage <= 0.65) {
+                popup.pin = orangePin;
+            }
+            else {
+                popup.pin = redPin;
+            }
 
-data.forEach((item) => {
-const marker = new L.Marker(new L.latLng(item.loc), { title: item.title, type: item.type }); //se property searched
-marker.bindPopup("title: " + item.title);
-markersLayer.addLayer(marker);
-});
+            return popup;
+        }
 
-// Grab the input element and add an event listener to it
-const inputEl = document.querySelector("input.search-input");
+        // function to create markers for the search result
+        function setMarkers(key) {
+            
+            // reset layers
+            markersLayer.remove();
+            resultsLayer.clearLayers();
+            // iterate through available pois
+            for (let poi of data) {
+                // not a relative search
+                if (poi.name.toLowerCase() === key.toLowerCase()) {
 
-inputEl.addEventListener("keypress", function (e) {
-if (e.key === "Enter" && results.length) {
-    
-    markersLayer.remove();
-    resultsLayer.clearLayers();
-    results.forEach((result) => {
-    const marker = L.marker(result.loc);
-    marker.bindPopup(`${result.text}`);
-    resultsLayer.addLayer(marker);
-    });
-    map.fitBounds(resultsLayer.getBounds());
-    results = [];
-}
-});
-</script>
+                    const popup = formPopup(poi);
+                    
+                    // create marker and add it to layer with search results
+                    resultsLayer.clearLayers(); // clear again => not a relative search
+                    const newMarker = L.marker([poi.coordinates.lat, poi.coordinates.lng], {icon: popup.pin});
+                    newMarker.bindPopup(popup.text);
+                    resultsLayer.addLayer(newMarker);
+                    break; // exact match found => no need to keep searching for pois
+                }
+                // (possibly) a relative search
+                else if (poi.name.toLowerCase().includes(key.toLowerCase())) {
+                    
+                    const popup = formPopup(poi);
+                    
+                    // create marker and add it to layer with search results
+                    const newMarker = L.marker([poi.coordinates.lat, poi.coordinates.lng], {icon: popup.pin});
+                    newMarker.bindPopup(popup.text);
+                    resultsLayer.addLayer(newMarker);
+                }                
+            };
+            //map.fitBounds(resultsLayer.getBounds());
+        }
+
+        // functions to create markers for each poi from db
+        async function getPins(bounds) {
+
+            // reset layer => reset available pois
+            markersLayer.clearLayers();
+
+            // request to get available pois
+            const res = await fetch('/home', {
+                method: 'POST',
+                body: JSON.stringify({ bounds: bounds }),
+                headers: {'Content-Type': 'application/json' }
+            });
+
+            // available pois
+            const data = await res.json();
+
+            pinMap(data.result);
+            return data.result;
+        }
+
+        // function to add markers for each available poi
+        function pinMap(data) {
+            data.forEach((item) => {
+                const marker = new L.Marker([item.coordinates.lat, item.coordinates.lng], { name: item.name, type: item.types });
+                marker.bindPopup("name: " + item.name);
+                markersLayer.addLayer(marker);
+            });
+        }
+
+        // function to update available pois based on user's map view
+        function updateAvailablePois() {
+            bounds = map.getBounds();
+            getPins(bounds)
+                .then(result => {
+                    console.log('update successful');
+                    data = result;
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+
+        // ---------> end of function definitions <---------
+
+        // create layer groups
+        let markersLayer = new L.LayerGroup(); // layer with all pois from db (available within user's view)
+        let resultsLayer = L.featureGroup(); // layer for searched elements
+        
+        // variable to store user's position - default: Pl. Georgiou, Patras, Greece
+        let position = { lat: 38.2376827, lng: 21.7259359 };
+
+        // create custom markers
+        const personPin = L.icon({
+            iconUrl: 'public/person_pin_black_24dp.svg',
+            shadowUrl: 'public/person_pin_shadow_24dp.svg',
+
+            iconSize:     [26, 26], // size of the icon
+            shadowSize:   [40, 40], // size of the shadow
+            iconAnchor:   [13, 26], // point of the icon which will correspond to marker's location
+            shadowAnchor: [8, 26],  // the same for the shadow
+            popupAnchor:  [0, -30] // point from which the popup should open relative to the iconAnchor
+        });
+        const LeafIcon = L.Icon.extend({
+            options: {
+                shadowUrl: '/public/location_pin_shadow_24dp.svg',
+                iconSize:     [40, 40],
+                shadowSize:   [70, 70],
+                iconAnchor:   [20, 40],
+                shadowAnchor: [12, 46],
+                popupAnchor: [0, -45]
+            }
+        });
+
+        const greenPin = new LeafIcon({ iconUrl: '/public/location_pin_green_24dp.svg' });
+        const redPin = new LeafIcon({ iconUrl: 'public/location_pin_red_24dp.svg' });
+        const orangePin = new LeafIcon({ iconUrl: 'public/location_pin_orange_24dp.svg' });
+        //const personPin = new LeafIcon({ iconUrl: 'public/person_pin_black_24dp.svg' });
+
+        // map initialization
+        let map = L.map('map');
+            
+        let tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+
+        // osm layer
+        map.addLayer(tiles);
+
+        map.setView([38.2462420, 21.7350847], 12);
+
+        // get user's location to center map or center map to default value: Pl. Georgiou, Patras, Greece
+        map.locate({setView: true, watch: true})
+            .on('locationfound', function(e){
+                position.lat = e.latitude;
+                position.lng = e.longitude;
+                const marker = L.marker([e.latitude, e.longitude], {icon: personPin}).bindPopup('You are here');
+                map.addLayer(marker);
+            })
+            .on('locationerror', function(e){
+                console.log(e);
+                alert("Location access denied.");
+                const marker = L.marker([position.lat, position.lng], {icon: personPin}).bindPopup('You are here');
+                map.addLayer(marker);
+            });
+
+        map.addLayer(markersLayer);
+        map.addLayer(resultsLayer);
+
+        // initialize variable for current map bounds
+        let bounds = map.getBounds();
+
+        // create search control
+        var controlSearch = new L.Control.Search({
+            position: "topright",
+            layer: markersLayer,
+            propertyName: 'name',
+            initial: false,
+            marker: false,
+            tipAutoSubmit: false,
+            // hijack buildtip function, add custom search for relative search
+            buildTip: (text, loc) => {
+                const tip = L.DomUtil.create("div");
+                tip.innerHTML = text;
+                L.DomEvent.disableClickPropagation(tip)
+                .on(tip, "click", L.DomEvent.stop, controlSearch)
+                .on(
+                    tip,
+                    "click",
+                    function (e) {
+                    controlSearch._input.value = text;
+                    controlSearch._handleAutoresize();
+                    controlSearch._input.focus();
+                    controlSearch._hideTooltip();
+                    controlSearch._handleSubmit();
+                    setMarkers(text);
+                    },
+                    controlSearch
+                );
+                return tip;
+            }
+        });
+
+        // add search control
+        map.addControl(controlSearch);
+        // remove markers with all pois
+        markersLayer.remove();
+
+        // grab the input elements and add event listeners to them
+        const inputElementEnter = document.querySelector("input.search-input");
+        const inputElementClick = document.querySelector("a.search-button");
+
+        inputElementEnter.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                setMarkers(e.target.value);
+            }
+        });
+
+        inputElementClick.addEventListener("click", function (e) {
+            if (inputElementEnter.value) {
+                setMarkers(inputElementEnter.value);
+            }
+        });
+
+        // event triggers: user zoomed or moved => update available pois
+        map.on('zoomend', updateAvailablePois);
+        map.on('moveend', updateAvailablePois);
+
+        // event trigger function: add visit button pressed => add visit and estimation(if any)
+        async function addVisit() {
+            const estimationSelector = document.getElementById('estimation');
+            const poiIdSelector = document.getElementById('poiId');
+            const estimationError = document.querySelector('.estimation.error');
+
+            let estimation = 0;
+            let poiId = poiIdSelector.innerHTML;
+            estimationError.textContent = '';
+
+            if (!estimationSelector.value) {
+                estimation = 'empty';
+            }
+            else {
+                estimation = estimationSelector.value;
+            }
+
+            estimationSelector.value = '';
+
+            try {
+                const res = await fetch('/add-visit', {
+                method: 'POST',
+                body: JSON.stringify({ poiId: poiId, estimation: estimation }),
+                headers: {'Content-Type': 'application/json' }
+                });
+
+                const data = await res.json();
+                if (data.error) {
+                    estimationError.textContent = data.error;
+                }
+                else {
+                    console.log('visit added successfully');
+                }
+            }
+            catch (err) {
+                console.log(err);
+            }
+            
+        }
+
+        // get pois from db and create markers
+        let promise = getPins(bounds);
+        promise.then(res => {
+            data = res;    
+        });
+
+    </script>
 
 
     <!-- footer -->
