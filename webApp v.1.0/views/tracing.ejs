@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body class="d-flex flex-column min-vh-100">
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+    <div class="tracing content">
+        <div class="container bg-altlight mt-4 p-3 shadow-sm rounded-top">
+            <h6 class="text-center text-muted">Possible contacts with positive cases during last 7 days</h6>
+        </div>
+        <div class="container-sm mb-4 p-4 bg-white shadow-sm rounded-bottom">
+            <% if (dangerousPois.length > 0) { %>
+                <% let index = 0 %> 
+                <!-- table -->
+                <table id="dangerousVisitsTable" class="table table-borderless table-responsive" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th class="th-sm text-muted">Name</th>
+                            <th class="th-sm text-muted">Address</th>
+                            <th class="th-sm text-muted">Visited on</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        <% dangerousPois.forEach(dangerousPoi => { %> 
+                            <tr>
+                                <th id="<%= index %>.1"><%= dangerousPoi.name %></th>
+                                <th id="<%= index %>.2"><%= dangerousPoi.address %></th>
+                                <th id="<%= index %>.3"><%= dangerousPoi.date %></th>
+                            </tr>
+                            <% index++ %>
+                        <% }) %>
+                    </tbody>
+                    <tfoot>
+                        
+                    </tfoot>
+                </table> 
+                <!-- pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mt-5 mb-4">
+                        <li class="page-item">
+                            <button class="page-link previous" onclick="previousPage()" aria-label="Previous" disabled>
+                                <span aria-hidden="true">&laquo;</span>
+                            </button>
+                        </li>
+                        <li class="page-item">
+                            <% if (maxPage === 1) { %> 
+                                <button class="page-link next" onclick="nextPage()" aria-label="Next" disabled>
+                                    <span aria-hidden="true">&raquo;</span>
+                                </button>
+                            <% } else { %> 
+                                <button class="page-link nextTests" onclick="nextPage()" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </button>
+                            <% } %> 
+                            <p class="maxPage" hidden><%= maxPage %> </p>
+                        </li>
+                    </ul>
+                </nav>
+            <% } else { %>
+                <p class="text-muted">Empty List</p>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+</html>
+
+<script>
+    let currentPage = 0;
+    const maxPage = document.querySelector("p.maxPage").innerHTML;
+
+    // event handler for next page in report history
+    async function nextPage(event) {
+        // trigger loading effect
+        document.getElementById('dangerousVisitsTable').classList.add('placeholder');
+
+        currentPage++;
+
+        // check if second page and enable previous button
+        if (currentPage === 1) {
+            document.querySelector('button.previous').removeAttribute('disabled');
+        }
+        
+        // check if last page and disable next button
+        if (currentPage === (maxPage - 1)) {
+            document.querySelector('button.next').setAttribute('disabled', '');
+        }
+
+        try {
+            const res = await fetch('/dangerousVisitsPages', {
+                method: 'POST',
+                body: JSON.stringify({ page: currentPage }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+
+            if (data.dangerousPois) {
+
+                let index = 0;
+                data.dangerousPois.forEach(dangerousPoi => {
+                    
+                    const th1 = document.getElementById(index+'.1');
+                    const th2 = document.getElementById(index+'.2');
+                    const th3 = document.getElementById(index+'.3');
+                    th1.textContent = dangerousPoi.name;
+                    th2.textContent = dangerousPoi.address;
+                    th3.textContent = dangerousPoi.date;
+
+                    index++
+                });
+                // stop loading effect
+                document.getElementById('dangerousVisitsTable').classList.remove('placeholder');
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    // event handler for previous page in report history
+    async function previousTestsPage(event) {
+        // trigger loading effect
+        document.getElementById('dangerousVisitsTable').classList.add('placeholder');
+
+        currentPage--;
+
+        // check if first page and disable previous button
+        if (currentPage === 0) {
+            document.querySelector('button.previous').setAttribute('disabled', '');
+        }
+
+        // check if second from end page and enable next button
+        if (currentPage === (maxPage - 1)) {
+            document.querySelector('button.next').removeAttribute('disabled');
+        }
+
+        try {
+            const res = await fetch('/dangerousVisitsPages', {
+                method: 'POST',
+                body: JSON.stringify({ page: currentPage }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+
+            if (data.dangerousPois) {
+
+                let index = 0;
+                data.dangerousPois.forEach(dangerousPoi => {
+                    
+                    const th1 = document.getElementById(index+'.1');
+                    const th2 = document.getElementById(index+'.2');
+                    const th3 = document.getElementById(index+'.3');
+                    th1.textContent = dangerousPoi.name;
+                    th2.textContent = dangerousPoi.address;
+                    th3.textContent = dangerousPoi.date;
+
+                    index++
+                });   
+                // stop loading effect
+                document.getElementById('dangerousVisitsTable').classList.remove('placeholder'); 
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+</script>

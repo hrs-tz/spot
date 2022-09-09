@@ -1,0 +1,149 @@
+<!-- navbar for desktop -->
+<nav class="navbar navbar-expand-sm navbar-light full">
+  <div class="container-sm">
+    <ul class="navbar-nav justify-content-start">
+      <li class="nav-item">
+        <a class="navbar-brand" href="/"><span class="fw-bold text-secondary">spot.</span></a>
+      </li>
+    </ul>
+    <!-- navbar links for user -->
+    <% if (user) { %> 
+      <ul class="navbar-nav justify-content-center">
+        <li class="nav-item  mx-4">
+          <a class="nav-link " href="/home">Homepage</a>
+        </li>
+        <li class="nav-item mx-4">
+          <a class="nav-link" href="/report">Report</a>
+        </li>
+        <li class="nav-item mx-4">
+          <a class="nav-link" href="/contact-tracing">Tracing</a>
+        </li>
+        <li class="nav-item mx-4">
+          <a class="nav-link" href="/profile">Profile</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav justify-content-end">
+        <li class="nav-item">
+          <a class="btn btn-outline-secondary" href="/logout">LOGOUT</a>
+        </li>
+      </ul>
+    <!-- navbar links for user -->
+    <!-- navbar links for admin -->
+    <% } else if (admin) { %>
+      <ul class="navbar-nav justify-content-center">
+        <li class="nav-item mx-4">
+          <a class="nav-link" href="/dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item mx-4">
+          <a class="nav-link" href="/upload">Upload</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav justify-content-end">
+        <li class="nav-item">
+          <a class="btn btn-outline-secondary" href="/logout">LOGOUT</a>
+        </li>
+      </ul>
+    <!-- navbar links for admin -->
+    <!-- navbar links for guest -->
+    <% } else { %>
+      <ul class="navbar-nav justify-content-end">
+        <li class="nav-item">
+          <a class="btn btn-primary me-4" href="/signup">GET STARTED</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-secondary" href="/login">LOGIN</a>
+        </li>
+      </ul>
+    <% } %>
+    <!-- navbar links for guest -->
+  </div>
+</nav>
+
+<!-- navbar for mobile -->
+<nav class="navbar navbar-expand-lg navbar-light mobile" style="display: none;">
+	<div class="container-fluid">
+		<ul class="navbar-nav justify-content-start">
+  			<li class="nav-item">
+    			<a class="navbar-brand" href="/"><span class="fw-bold text-secondary">spot.</span></a>
+    		</li>
+   		</ul>
+   		<ul class="navbar-nav justify-content-end">
+        <li class="nav-item">
+          <!-- CTA for user and admin: logout -->
+          <% if (user || admin) { %>
+            <a class="btn btn-outline-secondary me-4" href="/logout">LOGOUT</a>
+          <!-- CTA for guest: login -->
+          <% } else { %>
+            <a class="btn btn-outline-secondary me-4" href="/login">LOGIN</a>
+          <% } %>
+          <!-- toggle button for mobile nav -->
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
+      			<span class="navbar-toggler-icon"></span>
+    			</button>
+        </li>
+   		</ul>
+      <!-- navbar links -->
+      <div class="collapse navbar-collapse align-center" id="collapsibleNavbar">
+        <!-- navbar links for user -->
+        <% if (user) { %> 
+          <ul class="navbar-nav justify-content-center">
+            <li class="nav-item">
+              <a class="nav-link" href="/home"><i class="bi bi-house"></i> Homepage</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/report"><i class="bi bi-clipboard-plus"></i> Report</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/contact-tracing"><i class="bi bi-node-plus"></i> Tracing</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/profile"><i class="bi bi-person-circle"></i> Profile</a>
+            </li>
+          </ul>
+        <!-- navbar links for user -->
+        <!-- navbar links for admin -->
+        <% } else if (admin) { %>
+          <ul class="navbar-nav justify-content-center">
+            <li class="nav-item">
+              <a class="nav-link" href="/dashboard"><i class="bi bi-grid-3x3-gap"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/upload"><i class="bi bi-file-arrow-up"></i> Upload</a>
+            </li>
+          </ul>
+        <!-- navbar links for admin -->
+        <!-- navbar links for guest -->
+        <% } else { %>
+          <ul class="navbar-nav justify-content-end">
+            <li class="nav-item">
+              <a class="nav-link" href="/signup">GET STARTED</a>
+            </li>
+          </ul>
+        <% } %>
+        <!-- navbar links for guest -->
+      </div>
+  	</div>
+</nav>
+
+<script>
+  // responsive navbar
+  
+  const navBarMobile = document.querySelector('nav.mobile');
+  const navBar = document.querySelector('nav.full'); 
+
+  const mobileNav = (mediaQuery) => {
+    // if media query matches
+    if (mediaQuery.matches) { 
+      navBarMobile.style = 'display: block';
+      navBar.style = 'display: none';
+    }
+    else {
+      navBarMobile.style = 'display: none';
+      navBar.style = 'display: block';
+    }
+  }
+
+  let mediaQuery = window.matchMedia("(max-width: 768px)")
+  mobileNav(mediaQuery) // call listener function at run time
+  mediaQuery.addListener(mobileNav) // attach listener function on state changes
+</script>

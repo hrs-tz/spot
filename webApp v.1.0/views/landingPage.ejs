@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body class="d-flex flex-column min-vh-100">
+
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->    
+    <!-- image bg -->
+    <div class="bg-image" style="background-image: url('/public/img/live-illustration.svg');height: 80vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;">
+        <div class="bg-light d-flex text-center flex-column min-vh-80" style="--bs-bg-opacity: .6;">
+            <h1 class="text-center pt-4">
+                <div class="display-2 text-muted">Live.<span style="color:#EA6060">Safely.</span></div>
+            </h1>
+            <div class="display-6 text-muted text-center">
+                <a class="nav-link d-inline-block" href="#work">Work.<span style="color:#EA6060">Safely.</span></a>  
+            </div>
+            <div class="display-6 text-muted text-center">
+                <a class="nav-link d-inline-block" href="#commute">Commute.<span style="color:#EA6060">Safely.</span></a>  
+            </div>
+            <div class="display-6 text-muted text-center">
+                <a class="nav-link d-inline-block" href="#travel">Travel.<span style="color:#EA6060">Safely.</span></a>
+            </div>
+            <div class="display-6 text-muted pb-5 text-center">
+                <a class="nav-link d-inline-block" href="#socialize">Socialize.<span style="color:#EA6060">Safely.</span></a>
+            </div>
+        </div>
+    </div>
+    <h6 class="lead text-muted text-center mt-4">Scroll down <i class="bi bi-arrow-down-short"></i></h6>
+    
+    <section class="my-5" id="work">
+        <div class="container-fluid reveal">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-md-5 text-center text-md-start pe-md-5">
+                    <h1>
+                        <div class="display-4 text-md-end">Work.Safely</div>
+                    </h1>
+                    <p class="lead my-4 text-muted text-md-end">
+                        Need to visit the local post office? Or maybe drop by the local bank branch?
+                        Now with <span class="fw-bold">spot</span>, you can quickly check the colour-coded pins on the map and plan your schedule accordingly and safely.
+                    </p>
+                </div>
+                <div class="col-md-5 text-center d-none d-md-block">
+                    <img src="/public/img/work-illustration.svg" alt="work illustration" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="my-5" id="commute">
+        <div class="container-fluid bg-light py-5 reveal">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-md-5 text-center d-none d-md-block">
+                    <img src="/public/img/commute-illustration.svg" alt="commute illustration" class="img-fluid">
+                </div>
+                <div class="col-md-5 text-center text-md-start ps-md-5">
+                    <h1>
+                        <div class="display-4">Commute.Safely</div>
+                    </h1>
+                    <p class="lead my-4 text-muted">
+                        Going to work or school is much safer with <span class="fw-bold">spot</span>.
+                        Just check the map, see if your nearby station is overcrowded and choose another 
+                        station or other means of transportation. 
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="my-5" id="travel">
+        <div class="container-fluid reveal">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-md-5 text-center text-md-start pe-md-5">
+                    <h1>
+                        <div class="display-4 text-md-end">Travel.Safely</div>
+                    </h1>
+                    <p class="lead my-4 text-muted text-md-end">
+                        Travelling is fun. And now it's safe as well! With <span class="fw-bold">spot</span>,
+                        you can see the current popularity of hundreds of points of interest.
+                    </p>
+                </div>
+                <div class="col-md-5 text-center d-none d-md-block">
+                    <img src="/public/img/travel-illustration.svg" alt="travel illustration" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="mt-5 mb-3" id="socialize">
+        <div class="container-fluid bg-light py-5 reveal">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-md-5 text-center d-none d-md-block">
+                    <img src="/public/img/live-illustration.svg" alt="socialize illustration" class="img-fluid">
+                </div>
+                <div class="col-md-5 text-center text-md-start ps-md-5">
+                    <h1>
+                        <div class="display-4">Socialize.Safely</div>
+                    </h1>
+                    <p class="lead my-4 text-muted">
+                        Want to spend the night out with your friends? Having fun doesn't mean you have to risk your health.
+                        You can simply log in to your account, spot crowded places and avoid them.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+    
+</body>
+</html>
+
+<script>
+    function reveal() {
+    let reveals = document.querySelectorAll(".reveal");
+
+    for (let i = 0; i < reveals.length; i++) {
+        let windowHeight = window.innerHeight;
+        let elementTop = reveals[i].getBoundingClientRect().top;
+        let elementVisible = 60; // element visibility to triger animation
+
+        if (elementTop < windowHeight - elementVisible) {
+        reveals[i].classList.add("active");
+        } else {
+        reveals[i].classList.remove("active");
+        }
+    }
+    }
+
+    // event listener: when user scrolls
+    window.addEventListener("scroll", reveal);
+</script>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+
+<body class="d-flex flex-column min-vh-100">
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+    <!-- tabs -->
+    <div class="container-sm my-4 bg-white shadow-sm rounded">
+        <div class="row justify-content-lg-start justify-content-center">
+            <div class="col-lg-3 col-xxl-2 bg-altlight shadow-sm rounded-start">
+                <!-- nav tabs -->
+                <nav>
+                    <div class="nav nav-pills flex-lg-column p-4" id="upload-nav-tab" role="tablist">
+                        <!-- file upload tab -->
+                        <button class="nav-link active me-1 mb-lg-2 me-lg-0" id="nav-file-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-file-upload" type="button"
+                        role="tab" aria-controls="nav-file-upload" aria-selected="true"><i class="bi bi-upload"></i> Upload file</button>
+                        <!-- script tab -->
+                        <button class="nav-link me-1 mb-lg-2 me-lg-0" id="nav-script-tab" data-bs-toggle="tab" data-bs-target="#nav-script" type="button"
+                        role="tab" aria-controls="nav-script" aria-selected="false"><i class="bi bi-code-slash"></i> Test script</button>
+                        <button class="btn btn-outline-danger" type="button" id="delete-button"><i class="bi bi-trash"></i> Delete all pois</button>
+                        <div class="delete error text-danger"></div>
+                    </div>
+                </nav>
+            </div>
+            <div class="col-lg-9 col-xxl-10">
+                <!-- tab panes -->
+                <div class="tab-content" id="nav-tabContent">
+                    <!-- file upload tab pane -->
+                    <div class="tab-pane fade show active p-4" id="nav-file-upload" role="tabpanel" aria-labelledby="nav-file-upload-tab">
+                        <div class="container">
+                            <div class="row justify-content-center justify-content-xl-between align-items-center gx-5">
+                                <div class="col-lg-6 col-xxl-5">
+                                    <!-- form -->
+                                    <form class="upload">
+                                        <!-- file input -->
+                                        <label for="file" class="form-label text-muted">Choose a file to upate POIs list</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="json-addon"><i class="bi bi-filetype-json"></i></span>
+                                            <input class="form-control" type="file" id="file" name="file" required>
+                                        </div>
+                                        <div class="upload error text-danger"></div>
+                                        <!-- button -->
+                                        <div class="d-flex flex-column">
+                                            <button class="btn btn-primary btn-lg mt-5">UPLOAD <div class="spinner-border spinner-border-sm text-light" role="status" id="uploadSpinner" style="display: none;">
+                                                <span class="visually-hidden">Loading...</span>
+                                              </div></button>
+                                        </div>     
+                                    </form>
+                                </div>
+                                <div class="col-lg-6 col-xxl-7">
+                                    <img class="img-fluid d-none d-md-block mt-sm-4 mt-lg-0 ms-sm-5 ms-lg-0" src="/public/img/report.svg" alt="report illustration">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- script tab pane -->
+                    <div class="tab-pane fade p-4" id="nav-script" role="tabpanel" aria-labelledby="nav-script-tab">
+                        <div class="container">
+                            <div class="row justify-content-center justify-content-xl-between align-items-center gx-5">
+                                <div class="col-lg-6 col-xxl-5">
+                                    <!-- form -->
+                                    <form class="script">
+                                        <!-- # users input -->
+                                        <div class="form-floating mb-4">
+                                            <input type="number" class="form-control" id="numberOfUsers" placeholder="0" required>
+                                            <label for="numberOfUsers">Choose number of users</label>
+                                            <div class="number error text-danger"></div>
+                                        </div>
+                                        <!-- start date input -->
+                                        <div class="form-floating mb-4">
+                                            <input type="date" class="form-control" id="dateSelectionStart" placeholder="date">
+                                            <label for="dateSelectionStart">Visits from</label>
+                                            <div class="startDate error text-danger"></div>
+                                        </div>
+                                        <!-- and date input -->
+                                        <div class="form-floating">
+                                            <input type="date" class="form-control" id="dateSelectionEnd" placeholder="date">
+                                            <label for="dateSelectionEnd">Visits to</label>
+                                            <div class="endDate error text-danger"></div>
+                                        </div>
+                                        <!-- button -->
+                                        <div class="d-flex flex-column">
+                                            <button class="btn btn-primary btn-lg mt-5">RUN <div class="spinner-border spinner-border-sm text-light" role="status" id="scriptSpinner" style="display: none;">
+                                                <span class="visually-hidden">Loading...</span>
+                                              </div></button> <br>
+                                            <div class="message"></div>
+                                        </div>     
+                                    </form>
+                                </div>
+                                <div class="col-lg-6 col-xxl-7">
+                                    <img class="img-fluid d-none d-md-block mt-sm-4 mt-lg-0 ms-sm-5 ms-lg-0" src="/public/img/report.svg" alt="report illustration">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="deleteAllPois" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deleteAllPois" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title text-danger" id="staticBackdropLabel">Destructive action</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">
+                    You are about to delete all POIs stored in the database. This action is not reversible.
+                    Are you sure you want to continue?
+                </p>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCEL</button>
+            <button type="button" class="btn btn-danger" onclick="deleteAllPois()">CONFIRM</button>
+            </div>
+        </div>
+        </div>
+  </div>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+</html>
+
+<script>
+    const uploadForm = document.querySelector('form.upload');
+    const uploadError = document.querySelector('.upload.error');
+    const fileField = document.querySelector('input[type="file"]');
+    const uploadSpinner = document.getElementById('uploadSpinner');
+
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        // show upload spinner
+        uploadSpinner.style = 'display: inline-block';
+
+        // reset errors
+        uploadError.textContent = '';
+
+        try {
+        let formData = new FormData(); 
+        formData.append("file", fileField.files[0]);
+        const res = await fetch('/upload', {
+            method: "POST", 
+            body: formData
+        });
+
+            const data = await res.json();
+            // hide upload spinner
+            uploadSpinner.style = 'display: none;';
+
+            if (data.error) {
+                uploadError.textContent = data.error;
+            }
+            if (data.file) {
+                location.assign('/upload');
+            }
+        }
+        catch (err) {
+             console.log(err);
+        }
+    })
+</script>
+
+<script>
+    const button = document.querySelector('#delete-button');
+    const deleteError = document.querySelector('.delete.error');
+
+    //
+    async function deleteAllPois() {
+        // reset error
+        deleteError.textContent = '';
+
+        try {
+            const res = await fetch('/delete-all-pois', {
+                method: "DELETE", 
+            });
+            const data = await res.json();
+            if (data.error) {
+                deleteError.textContent = data.error;
+            }
+            if (data.deleted) {
+                location.assign('/upload');
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    button.onclick = async (e) => {
+        e.preventDefault();
+
+        const deleteAllModal = new bootstrap.Modal(document.getElementById('deleteAllPois'))
+        deleteAllModal.show();
+    };
+</script>
+
+<script>
+    const scriptForm = document.querySelector('form.script');
+    const numberError = document.querySelector('.number.error');
+    const startDateError = document.querySelector('.startDate.error');
+    const endDateError = document.querySelector('.endDate.error');
+    const message = document.querySelector('.message');
+    const numberField = document.getElementById('numberOfUsers');
+    const startDateField = document.getElementById('dateSelectionStart');
+    const endDateField = document.getElementById('dateSelectionEnd');
+    const scriptSpinner = document.getElementById('scriptSpinner');
+
+    scriptForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        // show script spinner
+        scriptSpinner.style = 'display: inline-block';
+
+        console.log('script');
+        // reset errors
+        numberError.textContent = '';
+        startDateError.textContent = '';
+        endDateError.textContent = '';
+        numberField.classList.remove('is-invalid');
+        startDateField.classList.remove('is-invalid');
+        endDateField.classList.remove('is-invalid');
+        message.classList.remove('text-warning');
+        message.innerHTML = '';
+
+        // get the values from the form
+        const numberOfUsers = scriptForm.numberOfUsers.value
+        const startDate = scriptForm.dateSelectionStart.value;
+        const endDate = scriptForm.dateSelectionEnd.value;
+
+        try {
+            const res = await fetch('/add-system-data', {
+                method: 'POST',
+                body: JSON.stringify({ numberOfUsers: numberOfUsers, startDateInput: startDate, endDateInput: endDate }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            // hide upload spinner
+            scriptSpinner.style = 'display: none;';
+
+            if (data.errors) {
+                numberError.textContent = data.errors.number;
+                startDateError.textContent = data.errors.startDate;
+                endDateError.textContent = data.errors.endDate
+
+                // mark as invalid accordingly
+                if (data.errors.number) {
+                    numberField.classList.add('is-invalid');
+                }
+                if (data.errors.startDate) {
+                    startDateField.classList.add('is-invalid');
+                }
+                if (data.errors.endDate) {
+                    endDateField.classList.add('is-invalid');
+                }
+                // form message
+                if (data.errors.general) {
+                    message.classList.add('text-warning');
+                    message.innerHTML = `<i class="bi bi-exclamation-square"></i> ${data.errors.general}`;
+                }
+            }
+            if (data.message) {
+                message.classList.add('text-success');
+                message.innerHTML = `<i class="bi bi-info-circle"></i> ${data.message}`;
+                setTimeout(() => {  location.assign('/upload'); }, 5000); // redirect after 5 sec
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    })
+</script>

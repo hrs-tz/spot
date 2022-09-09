@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body class="d-flex flex-column min-vh-100">
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %> 
+
+    <!-- content -->
+    <div class="report content">
+      <div class="container bg-altlight mt-4 p-3 shadow-sm rounded-top">
+        <h6 class="text-center text-muted">Report a positive COVID-19 case</h6>
+      </div>
+      <div class="container-sm mb-4 p-4 bg-white shadow-sm rounded-bottom">
+        <div class="row justify-content-center justify-content-xl-evenly align-items-center gx-5">
+          <div class="col-lg-6 col-xxl-5">
+              <!-- form -->
+              <form>
+                  <!-- date input -->
+                  <div class="form-floating mb-4">
+                      <input type="date" class="form-control" id="date" placeholder="example" value="<%= currentDate %>" max="<%= currentDate %>" required>
+                      <label for="date">Date of positive test</label>
+                      <div class="date error text-danger"></div>
+                  </div>
+
+                  <!-- test type input -->
+                  <div class="form-floating">
+                      <select class="form-select" id="select" aria-label="type selection">
+                        <option selected value="PCR" id="testType">PCR test</option>
+                        <option value="RAPID" id="testType">RAPID test</option>
+                      </select>
+                    <label for="select">Choose a type of test</label>
+                    <div class="type error text-danger"></div> 
+                  </div>
+                  <!-- button -->
+                  <div class="d-flex flex-column">
+                      <button class="btn btn-primary btn-lg mt-5">SUBMIT</button>
+                  </div>
+                  <div class="user error text-danger"></div> 
+              </form>
+          </div>
+          <!-- image -->
+          <div class="col-lg-6 col-xxl-5">
+              <img class="img-fluid d-none d-md-block mt-sm-4 mt-lg-0 ms-sm-5 ms-lg-0" src="/public/img/report.svg" alt="report illustration">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+</html>
+
+<script>
+  const form = document.querySelector('form');
+  const userError = document.querySelector('.user.error');
+  const dateError = document.querySelector('.date.error');
+  const typeError = document.querySelector('.type.error');
+  const dateField = document.getElementById('date');
+  const typeField = document.getElementById('select');
+
+  form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // reset errors
+      userError.textContent = '';
+      dateError.textContent = '';
+      typeError.textContent = '';
+      dateField.classList.remove('is-invalid');
+      typeField.classList.remove('is-invalid');
+
+      // get the values of the form
+      const date = form.date.value;
+      const testType = form.select.value;
+
+      try {
+          const res = await fetch('/report', {
+              method: 'POST',
+              body: JSON.stringify({ date: date, testType: testType }),
+              headers: {'Content-Type': 'application/json' }
+          });
+          const data = await res.json();
+          if (data.errors) {
+              userError.textContent = data.errors.user;
+              dateError.textContent = data.errors.date;
+              typeError.textContent = data.errors.testType;
+              
+              // mark as invalid accordingly
+              if (data.errors.date) {
+                    dateField.classList.add('is-invalid');
+                }
+                if (data.errors.testType) {
+                    typeField.classList.add('is-invalid');
+                }
+          }
+          if (data.result) {
+              location.assign('/home');
+          }
+      }
+      catch (err) {
+          console.log(err);
+      }
+  });
+</script>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+
+<body class="d-flex flex-column min-vh-100">
+    
+    <!-- image bg -->
+    <div class="bg-image" style="background-image: url('/public/img/AdobeStock_247608456.jpeg');height: 100vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;">
+        <div class="bg-light d-flex flex-column min-vh-100" style="--bs-bg-opacity: .6;">
+            <!-- login / signup navigation -->
+            <nav class="navbar navbar-expand-sm navbar-light full mt-1 ms-5 ps-sm-5">
+                <div class="container-flex">
+                <ul class="navbar-nav justify-content-start">
+                    <li class="nav-item">
+                    <a class="navbar-brand" href="/"><span class="fw-bold text-secondary">spot.</span></a>
+                    </li>
+                </ul>
+                </div>
+            </nav>
+
+            <!-- content -->
+            <div class="container-sm pb-5">
+                <div class="row justify-content-center justify-content-lg-end my-5">
+                    <div class="col-md-7 col-lg-6 col-xl-4 bg-white shadow-sm rounded py-4 px-4">
+                        <div class="text-center pb-4">
+                            <h2>Create an account</h2>
+                            <p>Already have an account? <a href="/login">Log In</a></p>
+                        </div>
+                        <!-- form -->
+                        <form>
+                            <!-- username input -->
+                            <div class="form-floating mb-2">
+                                <input type="text" class="form-control" id="username" placeholder="example" required>
+                                <label for="username">Username</label>
+                                <div class="username error text-danger"></div>
+                            </div>
+                            <!-- password input -->
+                            <div class="form-floating mb-2">
+                                <input type="password" class="form-control" id="password" placeholder="Password" required>
+                                <label for="password">Password</label>
+                                <div class="password error text-danger"></div>
+                            </div>
+                            <!-- email input -->
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" id="email" placeholder="name@example.com" required>
+                                <label for="email">Email address</label>
+                                <div class="email error text-danger"></div>
+                            </div>
+                            <!-- button -->
+                            <div class="d-flex flex-column">
+                                <button class="btn btn-primary btn-lg mt-5">SIGN UP</button>
+                            </div>     
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- transparent bg for footer -->
+            <div class="mt-auto bg-white pt-2" style="--bs-bg-opacity: .8;">
+                <!-- footer -->
+                <%- include('./partials/footer.ejs') %>
+            </div>
+        </div>  
+    </div>
+</body>
+
+</html>
+
+<script>
+    const form = document.querySelector('form');
+    const usernameError = document.querySelector('.username.error');
+    const passwordError = document.querySelector('.password.error');
+    const emailError = document.querySelector('.email.error');
+    const usernameField = document.getElementById('username');
+    const passwordField = document.getElementById('password');
+    const emailField = document.getElementById('email');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // reset errors
+        usernameError.textContent = '';
+        passwordError.textContent = '';
+        emailError.textContent = '';
+        usernameField.classList.remove('is-invalid');
+        passwordField.classList.remove('is-invalid');
+        emailField.classList.remove('is-invalid');
+
+        // get the values of the form
+        const username = form.username.value;
+        const password = form.password.value;
+        const email = form.email.value;
+
+        try {
+            const res = await fetch('/signup', {
+                method: 'POST',
+                body: JSON.stringify({ username: username, password: password, email: email }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            console.log(data);
+            if (data.errors) {
+                usernameError.textContent = data.errors.username;
+                passwordError.textContent = data.errors.password;
+                emailError.textContent = data.errors.email;
+
+                // mark as invalid accordingly
+                if (data.errors.username) {
+                    usernameField.classList.add('is-invalid');
+                }
+                if (data.errors.password) {
+                    passwordField.classList.add('is-invalid');
+                }
+                if (data.errors.email) {
+                    emailField.classList.add('is-invalid');
+                }
+            }
+            if (data.user) {
+                location.assign('/home');
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    });
+</script>

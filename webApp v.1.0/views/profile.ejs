@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- head -->
+<%- include('./partials/head.ejs') %>
+<body class="d-flex flex-column min-vh-100">
+    
+    <!-- navigation -->
+    <%- include('./partials/nav.ejs') %>
+
+    <!-- content -->
+    <!-- tabs -->
+    <div class="container-sm my-4 bg-white shadow-sm rounded">
+        <div class="row justify-content-lg-start justify-content-center">
+            <div class="col-lg-3 col-xxl-2 bg-altlight shadow-sm">
+                <!-- nav tabs -->
+                <nav>
+                    <div class="nav nav-pills flex-lg-column p-4" id="profile-nav-tab" role="tablist">
+                        <!-- report history tab -->
+                        <button class="nav-link active" id="nav-tests-tab" data-bs-toggle="tab" data-bs-target="#nav-tests" type="button"
+                        role="tab" aria-controls="nav-tests" aria-selected="true">Report history</button>
+                        <!-- visit history tab -->
+                        <button class="nav-link" id="nav-visits-tab" data-bs-toggle="tab" data-bs-target="#nav-visits" type="button"
+                        role="tab" aria-controls="nav-visits" aria-selected="false">Visit history</button>
+                        <!-- settings tab -->
+                        <button class="nav-link" id="nav-settings-tab" data-bs-toggle="tab" data-bs-target="#nav-settings" type="button"
+                        role="tab" aria-controls="nav-settings" aria-selected="false">Settings</button>
+                    </div>
+                </nav>
+            </div>
+            <div class="col-lg-9 col-xxl-10">
+                <!-- tab panes -->
+                <div class="tab-content" id="nav-tabContent">
+                    <!-- report history tab pane -->
+                    <div class="tab-pane fade show active p-4" id="nav-tests" role="tabpanel" aria-labelledby="nav-tests-tab">
+                        <% if (positiveCases.length > 0) { %>
+                            <% let testsIndex = 0 %> 
+                            <!-- table -->
+                            <table id="testsTable" class="table table-borderless table-responsive" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="th-sm text-muted">Date of positive</th>
+                                        <th class="th-sm text-muted">Type of test</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tests-tbody">
+                                    <% positiveCases.forEach(positiveCase => { %> 
+                                        <tr>
+                                            <th id="tests<%= testsIndex %>.1"><%= positiveCase.date %></th>
+                                            <th id="tests<%= testsIndex %>.2"><%= positiveCase.testType %></th>
+                                        </tr>
+                                        <% testsIndex++ %>
+                                    <% }) %>
+                                </tbody>
+                                <tfoot>
+                                    
+                                </tfoot>
+                            </table> 
+                            <!-- pagination -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center mt-5 mb-4">
+                                    <li class="page-item">
+                                        <button class="page-link previousTests" onclick="previousTestsPage()" aria-label="Previous" disabled>
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </button>
+                                    </li>
+                                    <li class="page-item">
+                                        <% if (maxTestsPage === 1) { %> 
+                                            <button class="page-link nextTests" onclick="nextTestsPage()" aria-label="Next" disabled>
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </button>
+                                        <% } else { %> 
+                                            <button class="page-link nextTests" onclick="nextTestsPage()" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </button>
+                                        <% } %> 
+                                        <p class="maxTestsPage" hidden><%= maxTestsPage %> </p>
+                                    </li>
+                                </ul>
+                            </nav>
+                        <% } else { %>
+                            <p class="text-muted">Empty List</p>
+                        <% } %> 
+                    </div>
+                    <!-- visit history tab pane -->
+                    <div class="tab-pane fade p-4 placeholder-glow" id="nav-visits" role="tabpanel" aria-labelledby="nav-visits-tab">
+                        <% if (pois.length > 0) { %>
+                            <% let visitsIndex = 0 %> 
+                            <!-- table -->
+                            <table id="visitsTable" class="table table-borderless table-responsive" cellspacing="0" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th class="th-sm text-muted">Name</th>
+                                        <th class="th-sm text-muted">Address</th>
+                                        <th class="th-sm text-muted">Visited on</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="visits-tbody">
+                                    <% pois.forEach(poi => { %> 
+                                        <tr>
+                                            <th id="visits<%= visitsIndex %>.1"><%= poi.name %></th>
+                                            <th id="visits<%= visitsIndex %>.2"><%= poi.address %></th>
+                                            <th id="visits<%= visitsIndex %>.3"><%= poi.timestamp %></th>
+                                        </tr>
+                                        <% visitsIndex++ %>
+                                    <% }) %>
+                                </tbody>
+                                <tfoot>
+                                    
+                                </tfoot>
+                            </table> 
+                            <!-- pagination -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center mt-5 mb-4">
+                                    <li class="page-item">
+                                        <button class="page-link previousVisits" onclick="previousVisitsPage()" aria-label="Previous" disabled>
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </button>
+                                    </li>
+                                    <li class="page-item">
+                                        <% if (maxVisitsPage === 1) { %>
+                                            <button class="page-link nextVisits" onclick="nextVisitsPage()" aria-label="Next" disabled>
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </button>
+                                        <% } else { %> 
+                                            <button class="page-link nextVisits" onclick="nextVisitsPage()" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </button>
+                                        <% } %> 
+                                        <p class="maxVisitsPage" hidden><%= maxVisitsPage %> </p>
+                                    </li>
+                                </ul>
+                            </nav>
+                        <% } else { %>
+                            <p class="text-muted">Empty List</p>
+                        <% } %> 
+                    </div>
+                    <!-- settings tab pane -->
+                    <div class="tab-pane fade p-4" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
+                        <div class="container">
+                            <div class="row justify-content-center justify-content-xl-between align-items-center gx-5">
+                                <div class="col-lg-6 col-xxl-5">
+                                    <!-- form -->
+                                    <form>
+                                        <!-- username input -->
+                                        <div class="form-floating mb-4">
+                                            <input type="text" class="form-control" id="username" placeholder="example" value="<%= user.username %>">
+                                            <label for="username">Username</label>
+                                            <div class="username error text-danger"></div>
+                                        </div>
+                                        <!-- old password input -->
+                                        <div class="form-floating mb-4">
+                                            <input type="password" class="form-control" id="oldpassword" placeholder="Password" required>
+                                            <label for="oldpassword">Old password</label>
+                                            <div class="oldpassword error text-danger"></div>
+                                        </div>
+                                        <!-- password input -->
+                                        <div class="form-floating mb-4">
+                                            <input type="password" class="form-control" id="password" placeholder="Password">
+                                            <label for="password">Password</label>
+                                            <div class="password error text-danger"></div>
+                                        </div>
+                                        <!-- switch to allow visit saves -->
+                                        <div class="form-check form-switch">
+                                            <% if (user.permission) { %> 
+                                                <input class="form-check-input" type="checkbox" id="allowSave" checked>
+                                            <% } else { %> 
+                                                <input class="form-check-input" type="checkbox" id="allowSave">
+                                            <% } %> 
+                                            <label class="form-check-label" for="allowSave">Allow <span class="fw-bold">spot</span> to save your visits</label>
+                                        </div>
+                                        <!-- button -->
+                                        <div class="d-flex flex-column">
+                                            <button class="btn btn-primary btn-lg mt-5">UPDATE</button>
+                                        </div>     
+                                    </form>
+                                </div>
+                                <div class="col-lg-6 col-xxl-7">
+                                    <img class="img-fluid d-none d-md-block mt-sm-4 mt-lg-0 ms-sm-5 ms-lg-0" src="/public/img/report.svg" alt="report illustration">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </div>
+
+    <!-- footer -->
+    <%- include('./partials/footer.ejs') %>
+
+</body>
+</html>
+
+<script>
+    let currentCasesPage = 0;
+
+    // event handler for next page in report history
+    async function nextTestsPage(event) {
+        const maxTestsPage = document.querySelector("p.maxTestsPage").innerHTML;
+        // trigger loading effect
+        document.getElementById('testsTable').classList.add('placeholder');
+
+        currentCasesPage++;
+
+        // check if second page and enable previous button
+        if (currentCasesPage === 1) {
+            document.querySelector('button.previousTests').removeAttribute('disabled');
+        }
+        
+        // check if last page and disable next button
+        if (currentCasesPage === (maxTestsPage - 1)) {
+            document.querySelector('button.nextTests').setAttribute('disabled', '');
+        }
+
+        try {
+            const res = await fetch('/positiveCasesPages', {
+                method: 'POST',
+                body: JSON.stringify({ casesPage: currentCasesPage }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+
+            if (data.positiveCases) {
+
+                let index = 0;
+                data.positiveCases.forEach(positiveCase => {
+                    
+                    const th1 = document.getElementById('tests'+index+'.1');
+                    const th2 = document.getElementById('tests'+index+'.2');
+                    th1.textContent = positiveCase.date;
+                    th2.textContent = positiveCase.testType;
+
+                    index++
+                });
+                // clear possible results from previous page
+                while (index < 20) {
+                    const th1 = document.getElementById('tests'+index+'.1');
+                    const th2 = document.getElementById('tests'+index+'.2');
+                    
+                    th1.textContent = '';
+                    th2.textContent = '';
+
+                    index++
+                }
+                // stop loading effect
+                document.getElementById('testsTable').classList.remove('placeholder');
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    // event handler for previous page in report history
+    async function previousTestsPage(event) {
+        const maxTestsPage = document.querySelector("p.maxTestsPage").innerHTML;
+        // trigger loading effect
+        document.getElementById('testsTable').classList.add('placeholder');
+
+        currentCasesPage--;
+
+        // check if first page and disable previous button
+        if (currentCasesPage === 0) {
+            document.querySelector('button.previousTests').setAttribute('disabled', '');
+        }
+
+        // check if second from end page and enable next button
+        if (currentCasesPage === (maxTestsPage - 2)) {
+            document.querySelector('button.nextTests').removeAttribute('disabled');
+        }
+
+        try {
+            const res = await fetch('/positiveCasesPages', {
+                method: 'POST',
+                body: JSON.stringify({ casesPage: currentCasesPage }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+
+            if (data.positiveCases) {
+
+                let index = 0;
+                data.positiveCases.forEach(positiveCase => {
+                    
+                    const th1 = document.getElementById('tests'+index+'.1');
+                    const th2 = document.getElementById('tests'+index+'.2');
+                    th1.textContent = positiveCase.date;
+                    th2.textContent = positiveCase.testType;
+
+                    index++
+                });   
+                // stop loading effect
+                document.getElementById('testsTable').classList.remove('placeholder'); 
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+</script>
+
+<script>
+    let currentVisitsPage = 0;
+    // event handler for next page in visit history
+    async function nextVisitsPage(event) {
+        const maxVisitsPage = document.querySelector("p.maxVisitsPage").innerHTML;
+        // trigger loading effect
+        document.getElementById('visitsTable').classList.add('placeholder');
+
+        currentVisitsPage++;
+
+        // check if second page and enable previous button
+        if (currentVisitsPage === 1) {
+            document.querySelector('button.previousVisits').removeAttribute('disabled');
+        }
+        
+        // check if last page and disable next button
+        if (currentVisitsPage === (maxVisitsPage - 1)) {
+            document.querySelector('button.nextVisits').setAttribute('disabled', '');
+        }
+
+        try {
+            const res = await fetch('/visitsPages', {
+                method: 'POST',
+                body: JSON.stringify({ visitsPage: currentVisitsPage }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            
+            if (data.pois) {
+
+                let index = 0;
+                data.pois.forEach(poi => {
+                    
+                    const th1 = document.getElementById('visits'+index+'.1');
+                    const th2 = document.getElementById('visits'+index+'.2');
+                    const th3 = document.getElementById('visits'+index+'.3');
+                    
+                    th1.textContent = poi.name;
+                    th2.textContent = poi.address;
+                    th3.textContent = poi.timestamp;
+                    
+                    index++
+                });
+                // clear possible results from previous page
+                while (index < 20) {
+                    const th1 = document.getElementById('visits'+index+'.1');
+                    const th2 = document.getElementById('visits'+index+'.2');
+                    const th3 = document.getElementById('visits'+index+'.3');
+                    
+                    th1.textContent = '';
+                    th2.textContent = '';
+                    th3.textContent = '';
+
+                    index++
+                }
+                // stop loading effect
+                document.getElementById('visitsTable').classList.remove('placeholder'); 
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+
+    // event handler for previous page in visit history
+    async function previousVisitsPage(event) {
+        const maxVisitsPage = document.querySelector("p.maxVisitsPage").innerHTML;
+        // trigger loading effect
+        document.getElementById('visitsTable').classList.add('placeholder');
+
+        currentVisitsPage--;
+
+        // check if first page and disable previous button
+        if (currentVisitsPage === 0) {
+            document.querySelector('button.previousVisits').setAttribute('disabled', '');
+        }
+
+        // check if second from end page and enable next button
+        if (currentVisitsPage === (maxVisitsPage - 2)) {
+            document.querySelector('button.nextVisits').removeAttribute('disabled');
+        }
+
+        try {
+            const res = await fetch('/visitsPages', {
+                method: 'POST',
+                body: JSON.stringify({ visitsPage: currentVisitsPage }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+
+            if (data.pois) {
+
+                let index = 0;
+                data.pois.forEach(poi => {
+                    
+                    const th1 = document.getElementById('visits'+index+'.1');
+                    const th2 = document.getElementById('visits'+index+'.2');
+                    const th3 = document.getElementById('visits'+index+'.3');
+                    th1.textContent = poi.name;
+                    th2.textContent = poi.address;
+                    th3.textContent = poi.timestamp;
+
+                    index++
+                });  
+                // stop loading effect
+                document.getElementById('visitsTable').classList.remove('placeholder'); 
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+</script>
+
+<script>
+    const form = document.querySelector('form');
+    const usernameError = document.querySelector('.username.error');
+    const oldPasswordError = document.querySelector('.oldpassword.error');
+    const passwordError = document.querySelector('.password.error');
+    const usernameField = document.getElementById('username');
+    const oldPasswordField = document.getElementById('oldpassword');
+    const passwordField = document.getElementById('password');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // reset errors
+        usernameError.textContent = '';
+        oldPasswordError.textContent = '';
+        passwordError.textContent = '';
+        usernameField.classList.remove('is-invalid');
+        oldPasswordField.classList.remove('is-invalid');
+        passwordField.classList.remove('is-invalid');
+
+
+        // get the values of the form
+        const username = form.username.value;
+        const oldPassword = form.oldpassword.value;
+        const password = form.password.value;
+        let permission = false;
+        if (form.allowSave.checked) {
+            permission = true;
+        }
+
+        console.log(form.allowSave);
+        console.log(permission);
+        
+        try {
+            const res = await fetch('/profile', {
+                method: 'POST',
+                body: JSON.stringify({ username: username, oldPassword: oldPassword, password: password, permission: permission }),
+                headers: {'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+
+            if (data.errors) {
+                usernameError.textContent = data.errors.username;
+                oldPasswordError.textContent = data.errors.oldPassword;
+                passwordError.textContent = data.errors.password;
+
+                // mark as invalid accordingly
+                if (data.errors.username) {
+                    usernameField.classList.add('is-invalid');
+                }
+                if (data.errors.oldPassword) {
+                    oldPasswordField.classList.add('is-invalid');
+                }
+                if (data.errors.password) {
+                    passwordField.classList.add('is-invalid');
+                }
+            }
+            if (data.user) {
+                location.assign('/profile');
+            }
+        }
+        catch (err) {
+            console.log(err);
+        }
+    });
+</script>
