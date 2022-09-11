@@ -89,37 +89,79 @@
             timeFloor.setHours(currentDate.getHours() - 2);
             if (poi.current_popularity && new Date(poi.updatedAt) >= timeFloor) {
                 if (checkDistance(poi.coordinates.lat, poi.coordinates.lng, position.lat, position.lng) && permission) {
-                    popup.text = `<b>Name:</b> ${poi.name} <br>
-                    <b>Type:</b> ${types} <br>
-                    <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>
-                    <b>Current popularity:</b> ${poi.current_popularity} <br>
+                    popup.text = `<div class="text-center mb-2">
+                        <i class="bi bi-shop-window"></i> ${poi.name} <br>
+                    </div>
+                    <div class="mb-1">
+                        <i class="bi bi-tags"></i> ${types} <br>
+                    </div>
+                    <div class="mb-1">
+                    <i class="bi bi-clock"></i> ${hour}:00 ~ <i class="bi bi-people"></i> ${poi.populartimes[day].data[hour]} | <i class="bi bi-clock"></i> ${hour + 1}:00 ~ <i class="bi bi-people"></i> ${poi.populartimes[day].data[hour + 1]} <br>
+                    </div>
+                    <div class="mb-1">
+                    <i class="bi bi-people"></i> ${poi.current_popularity} <br>
+                    </div>
                     <hr>
-                    <input type="text" id="estimation" name="estimation"><button onclick="addVisit()"><span class="material-icons">add_location_alt</span></button> <br>
+                    <div class="container mx-0 px-0">
+                        <div class="row align-items-center">
+                            <div class="col-9">
+                                <input class="form-control" type="number" placeholder="How crowded is it?" id="estimation" name="estimation">
+                            </div>
+                            <div class="col-3">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="addVisit()"><span class="material-icons">add_location_alt</span></button>
+                            </div>
+                        </div>
+                    </div>
                     <div id="poiId" name="poiId" style="display: none">${poi._id}</div>
-                    <div class="estimation error"></div>`;
+                    <div class="estimation error text-danger"></div>`;
                 }
                 else {
-                    popup.text = `<b>Name:</b> ${poi.name} <br>
-                    <b>Type:</b> ${types} <br>
-                    <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>
-                    <b>Current popularity:</b> ${poi.current_popularity} <br>`;
+                    popup.text = `<div class="text-center mb-2">
+                        <i class="bi bi-shop-window"></i> ${poi.name} <br>
+                    </div>
+                    <div class="mb-1">
+                        <i class="bi bi-tags"></i> ${types} <br>
+                    </div>
+                    <div class="mb-1">
+                        <i class="bi bi-clock"></i> ${hour}:00 ~ <i class="bi bi-people"></i> ${poi.populartimes[day].data[hour]} | <i class="bi bi-clock"></i> ${hour + 1}:00 ~ <i class="bi bi-people"></i> ${poi.populartimes[day].data[hour + 1]} <br>
+                    </div>
+                    <i class="bi bi-people"></i> ${poi.current_popularity} <br>`;
                 }
                 
             }
             else {
                 if (checkDistance(poi.coordinates.lat, poi.coordinates.lng, position.lat, position.lng) && permission) {
-                    popup.text = `<b>Name:</b> ${poi.name} <br>
-                    <b>Type:</b> ${types} <br>
-                    <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>
+                    popup.text = `<div class="text-center mb-2">
+                        <i class="bi bi-shop-window"></i> ${poi.name} <br>
+                    </div>
+                    <div class="mb-1">
+                        <i class="bi bi-tags"></i> ${types} <br>
+                    </div>
+                    <div class="mb-1">
+                        <i class="bi bi-clock"></i> ${hour}:00 ~ <i class="bi bi-people"></i> ${poi.populartimes[day].data[hour]} | <i class="bi bi-clock"></i> ${hour + 1}:00 ~ <i class="bi bi-people"></i> ${poi.populartimes[day].data[hour + 1]} <br>
+                    </div>
                     <hr>
-                    <input type="text" id="estimation" name="estimation"><button onclick="addVisit()"><span class="material-icons">add_location_alt</span></button> <br>
+                    <div class="container mx-0 px-0">
+                        <div class="row align-items-center">
+                            <div class="col-9">
+                                <input class="form-control" type="number" placeholder="How crowded is it?" id="estimation" name="estimation">
+                            </div>
+                            <div class="col-3">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="addVisit()"><span class="material-icons">add_location_alt</span></button>
+                            </div>
+                        </div>
+                    </div>
                     <div id="poiId" name="poiId" style="display: none">${poi._id}</div>
-                    <div class="estimation error"></div>`;
+                    <div class="estimation error text-danger"></div>`;
                 }
                 else {
-                    popup.text = `<b>Name:</b> ${poi.name} <br>
-                    <b>Type:</b> ${types} <br>
-                    <b>Popular hours:</b> ${hour}:00 ~ ${poi.populartimes[day].data[hour]} | ${hour + 1}:00 ~ ${poi.populartimes[day].data[hour + 1]} <br>`;
+                    popup.text = `<div class="text-center mb-2">
+                        <i class="bi bi-shop-window"></i> ${poi.name} <br>
+                    </div>
+                    <div class="mb-1">
+                        <i class="bi bi-tags"></i> ${types} <br>
+                    </div>
+                    <i class="bi bi-clock"></i> ${hour}:00 ~ <i class="bi bi-people"></i> ${poi.populartimes[day].data[hour]} | <i class="bi bi-clock"></i> ${hour + 1}:00 ~ <i class="bi bi-people"></i> ${poi.populartimes[day].data[hour + 1]} <br>`;
                 }
                 
             }

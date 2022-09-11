@@ -35,6 +35,10 @@ const handleErrors = (err) => {
 
 module.exports.profile_get = async (req, res) => {
     try {
+        // clear cache
+        visitsCache.del(visitsCache.keys());
+        casesCache.del(casesCache.keys());
+        
         // get user's visits and number of user's visits for pagination
         const visits = await Visit.find({ user: res.locals.user }).sort({ 'createdAt': -1 }).limit(20);
         let maxVisitsPage = await Visit.countDocuments({ user: res.locals.user });

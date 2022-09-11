@@ -119,8 +119,6 @@ app.post('/report', requireAuth, reportController.report_post);
 
 app.get('/contact-tracing', requireAuth, tracingController.tracing_get);
 
-app.get('/dangerousVisitsPages', requireAuth, tracingController.dangerousVisitsPages_post);
-
 app.get('/profile', requireAuth, profileController.profile_get);
 
 app.post('/profile', requireAuth, profileController.profile_post);

@@ -402,129 +402,118 @@ module.exports.populateChartPerDay_post = async (req, res) => {
     // time interval and date selection
     const { from, to } = req.body;
 
-    // check cache
-    if (statisticsCache.has('perDay')) {
-        console.log('cache hit');
-        res.status(200).json(statisticsCache.get('perDay'));
-    }
-    else {
-        console.log('cache miss');
+    try {
+        // get visits per day
+        results.visitsPerDay = await Visit.aggregate([
+            { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
+            { $match: { creationDate: { $gte: from, $lte: to} } },
+            {
+                $group: {
+                    _id: "$creationDate",
+                    totalVisits: {
+                    $count: {}
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id",
+                    totalVisits: 1
+                }
+            },
+            {
+                $sort: {
+                    date: 1
+                }
+            }
+        ]);
 
-        try {
-            // get visits per day
-            results.visitsPerDay = await Visit.aggregate([
-                { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
-                { $match: { creationDate: { $gte: from, $lte: to} } },
+        // get visits made by positive cases per day
+        results.dangerousVisitsPerDay = await Visit.aggregate([
+            { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
+            { $match: { creationDate: { $gte: from, $lte: to} } },
+            { $lookup:
                 {
-                    $group: {
-                        _id: "$creationDate",
-                        totalVisits: {
-                        $count: {}
-                        }
-                    }
-                },
-                {
-                    $project: {
-                        _id: 0,
-                        date: "$_id",
-                        totalVisits: 1
-                    }
-                },
-                {
-                    $sort: {
-                        date: 1
-                    }
+                    from: 'positivecases',
+                    localField: 'user',
+                    foreignField: 'user',
+                    pipeline: [
+                        { "$sort" : { "date" : -1 }}
+                    ],
+                    as: 'testDate'
                 }
-            ]);
-    
-            // get visits made by positive cases per day
-            results.dangerousVisitsPerDay = await Visit.aggregate([
-                { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
-                { $match: { creationDate: { $gte: from, $lte: to} } },
-                { $lookup:
-                    {
-                        from: 'positivecases',
-                        localField: 'user',
-                        foreignField: 'user',
-                        pipeline: [
-                            { "$sort" : { "date" : -1 }}
-                        ],
-                        as: 'testDate'
-                    }
-                },
+            },
+            {
+                $set: {
+                testDate: { $arrayElemAt: ["$testDate.date", 0] }
+                }
+            },
+            {
+                $match:
                 {
-                    $set: {
-                    testDate: { $arrayElemAt: ["$testDate.date", 0] }
-                    }
-                },
-                {
-                    $match:
-                    {
-                        $and: [
-                            { $expr:
-                                {
-                                    $lt:
-                                    [ "$createdAt",
+                    $and: [
+                        { $expr:
+                            {
+                                $lt:
+                                [ "$createdAt",
+                                    {
+                                        $dateAdd:
                                         {
-                                            $dateAdd:
-                                            {
-                                                startDate: "$testDate",
-                                                unit: "day",
-                                                amount: 15
-                                            }
+                                            startDate: "$testDate",
+                                            unit: "day",
+                                            amount: 15
                                         }
-                                    ]
-                                }
-                            },
-                            { $expr:
-                                {
-                                    $gt:
-                                    [ "$createdAt",
-                                        {
-                                            $dateAdd:
-                                            {
-                                                startDate: "$testDate",
-                                                unit: "day",
-                                                amount: -8
-                                            }
-                                        }
-                                    ]
-                                }
+                                    }
+                                ]
                             }
-                        ]   
-                    }
-                },
-                {
-                    $group: {
-                        _id: "$creationDate",
-                        totalVisits: {
-                        $count: {}
+                        },
+                        { $expr:
+                            {
+                                $gt:
+                                [ "$createdAt",
+                                    {
+                                        $dateAdd:
+                                        {
+                                            startDate: "$testDate",
+                                            unit: "day",
+                                            amount: -8
+                                        }
+                                    }
+                                ]
+                            }
                         }
-                    }
-                },
-                {
-                    $project: {
-                        _id: 0,
-                        date: "$_id",
-                        totalVisits: 1
-                    }
-                },
-                {
-                    $sort: {
-                        date: 1
+                    ]   
+                }
+            },
+            {
+                $group: {
+                    _id: "$creationDate",
+                    totalVisits: {
+                    $count: {}
                     }
                 }
-            ]);
-    
-            // add to cache with TTL 5min
-            statisticsCache.set('perDay', { results }, 300000);
-            res.status(200).json({ results });
-        }
-        catch (err) {
-            console.log(err);
-            const error = err.message;
-            res.send(error);
-        }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id",
+                    totalVisits: 1
+                }
+            },
+            {
+                $sort: {
+                    date: 1
+                }
+            }
+        ]);
+
+        res.status(200).json({ results });
+    }
+    catch (err) {
+        console.log(err);
+        const error = err.message;
+        res.send(error);
     }
 };
 
@@ -533,147 +522,136 @@ module.exports.populateChartPerHour_post = async (req, res) => {
 
     // date selection
     const { selectedDate } = req.body;
+    
+    try {
+        // get visits per hour
+        results.visitsPerHour = await Visit.aggregate([
+            { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
+            { $project: { 
+                    hour: { $toString: { $hour: "$createdAt" } },
+                    user: 1,
+                    poi: 1,
+                    createdAt: 1,
+                    creationDate: 1
+                }
+            },
+            { $match: { creationDate: { $eq: selectedDate } } },
+            {
+                $group: {
+                    _id: "$hour",
+                    totalVisits: {
+                    $count: {}
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id",
+                    totalVisits: 1
+                }
+            },
+            {
+                $sort: {
+                    date: 1
+                }
+            }
+        ]);
 
-    // check cache
-    if (statisticsCache.has('perHour')) {
-        console.log('cache hit');
-        res.status(200).json(statisticsCache.get('perHour'));
-    }
-    else {
-        console.log('cache miss');
-        
-        try {
-            // get visits per hour
-            results.visitsPerHour = await Visit.aggregate([
-                { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
-                { $project: { 
-                        hour: { $toString: { $hour: "$createdAt" } },
-                        user: 1,
-                        poi: 1,
-                        createdAt: 1,
-                        creationDate: 1
-                    }
-                },
-                { $match: { creationDate: { $eq: selectedDate } } },
-                {
-                    $group: {
-                        _id: "$hour",
-                        totalVisits: {
-                        $count: {}
-                        }
-                    }
-                },
-                {
-                    $project: {
-                        _id: 0,
-                        date: "$_id",
-                        totalVisits: 1
-                    }
-                },
-                {
-                    $sort: {
-                        date: 1
-                    }
+        // get visits made by positive cases per hour
+        results.dangerousVisitsPerHour = await Visit.aggregate([
+            { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
+            { $project: 
+                { 
+                    hour: { $toString: { $hour: "$createdAt" } },
+                    user: 1,
+                    poi: 1,
+                    createdAt: 1,
+                    creationDate: 1
                 }
-            ]);
-    
-            // get visits made by positive cases per hour
-            results.dangerousVisitsPerHour = await Visit.aggregate([
-                { $addFields: { "creationDate":  {$dateToString:{format: "%Y-%m-%d", date: "$createdAt"}}}},
-                { $project: 
-                    { 
-                        hour: { $toString: { $hour: "$createdAt" } },
-                        user: 1,
-                        poi: 1,
-                        createdAt: 1,
-                        creationDate: 1
-                    }
-                },
-                { $match: { creationDate: { $eq: selectedDate } } },
-                { $lookup:
-                    {
-                        from: 'positivecases',
-                        localField: 'user',
-                        foreignField: 'user',
-                        pipeline: [
-                            { "$sort" : { "date" : -1 }}
-                        ],
-                        as: 'testDate'
-                    }
-                },
+            },
+            { $match: { creationDate: { $eq: selectedDate } } },
+            { $lookup:
                 {
-                    $set: {
-                    testDate: { $arrayElemAt: ["$testDate.date", 0] }
-                    }
-                },
+                    from: 'positivecases',
+                    localField: 'user',
+                    foreignField: 'user',
+                    pipeline: [
+                        { "$sort" : { "date" : -1 }}
+                    ],
+                    as: 'testDate'
+                }
+            },
+            {
+                $set: {
+                testDate: { $arrayElemAt: ["$testDate.date", 0] }
+                }
+            },
+            {
+                $match:
                 {
-                    $match:
-                    {
-                        $and: [
-                            { $expr:
-                                {
-                                    $lt:
-                                    [ "$createdAt",
+                    $and: [
+                        { $expr:
+                            {
+                                $lt:
+                                [ "$createdAt",
+                                    {
+                                        $dateAdd:
                                         {
-                                            $dateAdd:
-                                            {
-                                                startDate: "$testDate",
-                                                unit: "day",
-                                                amount: 15
-                                            }
+                                            startDate: "$testDate",
+                                            unit: "day",
+                                            amount: 15
                                         }
-                                    ]
-                                }
-                            },
-                            { $expr:
-                                {
-                                    $gt:
-                                    [ "$createdAt",
-                                        {
-                                            $dateAdd:
-                                            {
-                                                startDate: "$testDate",
-                                                unit: "day",
-                                                amount: -8
-                                            }
-                                        }
-                                    ]
-                                }
+                                    }
+                                ]
                             }
-                        ]   
-                    }
-                },
-                {
-                    $group: {
-                        _id: "$hour",
-                        totalVisits: {
-                        $count: {}
+                        },
+                        { $expr:
+                            {
+                                $gt:
+                                [ "$createdAt",
+                                    {
+                                        $dateAdd:
+                                        {
+                                            startDate: "$testDate",
+                                            unit: "day",
+                                            amount: -8
+                                        }
+                                    }
+                                ]
+                            }
                         }
-                    }
-                },
-                {
-                    $project: {
-                        _id: 0,
-                        date: "$_id",
-                        totalVisits: 1
-                    }
-                },
-                {
-                    $sort: {
-                        date: 1
+                    ]   
+                }
+            },
+            {
+                $group: {
+                    _id: "$hour",
+                    totalVisits: {
+                    $count: {}
                     }
                 }
-            ]);
-    
-            // add to cache with TTL 5min
-            statisticsCache.set('perHour', { results }, 300000);
-            res.status(200).json({ results });
-        }
-        catch (err) {
-            console.log(err);
-            const error = err.message;
-            res.send(error);
-        }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    date: "$_id",
+                    totalVisits: 1
+                }
+            },
+            {
+                $sort: {
+                    date: 1
+                }
+            }
+        ]);
+
+        res.status(200).json({ results });
+    }
+    catch (err) {
+        console.log(err);
+        const error = err.message;
+        res.send(error);
     }
 };
 
